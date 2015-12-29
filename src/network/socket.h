@@ -8,6 +8,13 @@
  *
  */
 
+/**
+ * @example unixDomainStreamClient.c
+ * @example unixDomainStreamServer.c
+ *
+ * UNIX domain 中的流 socket
+ */
+
 #include <netdb.h>
 #include <sys/un.h>
 #include <arpa/inet.h>
@@ -20,6 +27,8 @@
  * 允许同一主机上的应用程序之间进行通讯, 地址格式为路径名.
  *
  * 地址结构: @ref sockaddr_un
+ *
+ * @see http://lxr.free-electrons.com/source/include/linux/socket.h#L161
 */
 #define AF_UNIX 1
 
@@ -30,6 +39,8 @@
  * 使用 IPv4 连接.
  *
  * 地址结构: @ref sockaddr_in
+ *
+ * @see http://lxr.free-electrons.com/source/include/linux/socket.h#L163
 */
 #define AF_INET 2
 
@@ -40,8 +51,10 @@
  * 使用 IPv6 连接.
  *
  * 地址结构: @ref sockaddr_in6
+ *
+ * @see http://lxr.free-electrons.com/source/include/linux/socket.h#L171
 */
-#define AF_INET6 30
+#define AF_INET6 10
 
 /**
  * @def SOCK_STREAM
@@ -50,6 +63,8 @@
  * <sys/socket.h>
  *
  * 流 socket 提供了一个可靠的双向的字节流通信信道.
+ *
+ * @see
  *
 */
 #define	SOCK_STREAM	1
@@ -68,6 +83,8 @@
  * @brief 系统中允许未决连接的最大数量
  *
  * <sys/socket.h>
+ *
+ * @see http://lxr.free-electrons.com/source/include/linux/socket.h#L252
  */
 #define	SOMAXCONN	128
 
@@ -83,6 +100,7 @@
  * @see sockaddr_un
  * @see sockaddr_in
  * @see sockaddr_in6
+ * @see http://lxr.free-electrons.com/source/include/linux/socket.h#L29
  */
 struct sockaddr {
     sa_family_t sa_family;
@@ -115,6 +133,8 @@ struct sockaddr {
  * 采用最小值. 并且在想这个字段写入数据时使用 [snprintf()](http://man7.org/linux/man-pages/man3/printf.3.html)
  * 或 [strncpy()](http://man7.org/linux/man-pages/man3/strncpy.3.html)
  * 以避免缓冲区溢出.
+ *
+ * @see http://lxr.free-electrons.com/source/include/uapi/linux/un.h#L8
  */
 struct sockaddr_un {
     sa_family_t sun_family; //!< 总是 AF_UNIX
@@ -128,6 +148,7 @@ struct sockaddr_un {
  *
  * 可使用 inet_pton() 与 inet_ntop() 函数将 IP 地址在二进制与十进制(人类可读的,用 . 分割)形式之间进行转换
  *
+ * @see http://lxr.free-electrons.com/source/include/uapi/linux/in.h#L84
  */
 struct in_addr {
     in_addr_t s_addr; //!< 无符号 4字节的 32 位整数
@@ -137,6 +158,8 @@ struct in_addr {
  * @brief IPv4 地址结构
  *
  * 定义在 <netinet/in.h> 头文件中
+ *
+ * @see http://lxr.free-electrons.com/source/include/uapi/linux/in.h#L230
  */
 struct sockaddr_in {
     sa_family_t    sin_family; //!< 总是 AF_INET
@@ -146,6 +169,8 @@ struct sockaddr_in {
 
 /**
  * @brief 用于 IPv6 IP 地址.
+ *
+ * @see http://lxr.free-electrons.com/source/include/uapi/linux/in6.h#L32
  */
 struct in6_addr {
     unit8_t s6_addr[16]; //!< 16 个字节, 等于 128 位
@@ -155,6 +180,8 @@ struct in6_addr {
  * @brief IPv6 地址结构
  *
  * 定义在 <netinet/in.h> 头文件中
+ *
+ * @see http://lxr.free-electrons.com/source/include/uapi/linux/in6.h#L49
  */
 struct sockaddr_in6 {
     sa_family_t     sin6_family;   //!< 总是 AF_INET6
@@ -180,6 +207,8 @@ struct sockaddr_in6 {
  *
  * @return 返回一个 socket 文件描述符用来表示与客户端的连接
  * @retval -1 失败
+ *
+ * @see http://man7.org/linux/man-pages/man2/accept.2.html
  */
 int accept(int sockfd, struct sockaddr *addr, socklen_t *addrlen);
 
@@ -210,6 +239,7 @@ int accept(int sockfd, struct sockaddr *addr, socklen_t *addrlen);
  * @endcode
  *
  * @see socket()
+ * @see http://man7.org/linux/man-pages/man2/bind.2.html
  */
 int
 bind(int sockfd, const struct sockaddr *addr, socklen_t addrlen);
@@ -236,6 +266,8 @@ bind(int sockfd, const struct sockaddr *addr, socklen_t addrlen);
  * // 返回对端 socket 的 IPv4 地址结构
  * connect(sfd, (struct sockaddr_in *)&addr, sizeof(struct sockaddr_in));
  * @endcode
+ *
+ * @see http://man7.org/linux/man-pages/man2/connect.2.html
  */
 int
 connect(int sockfd, const struct sockaddr *addr, socklen_t addrlen);
@@ -257,6 +289,8 @@ connect(int sockfd, const struct sockaddr *addr, socklen_t addrlen);
  * @retval -1 失败
  *
  * @note 无法在一个已经连接的 socket 上(即已经成功执行 connect() 的 socket 或者由 accept() 调用返回的 socket)执行 listen()
+ *
+ * @see http://man7.org/linux/man-pages/man2/listen.2.html
  */
 int
 listen(int sockfd, int backlog);
@@ -278,6 +312,7 @@ listen(int sockfd, int backlog);
  * @retval -1 失败
  *
  * @see sendto()
+ * @see http://man7.org/linux/man-pages/man2/recvfrom.2.html
  */
 ssize_t
 recvfrom(int sockfd,
@@ -297,6 +332,9 @@ recvfrom(int sockfd,
  *
  * @return 返回发送的字节数
  * @retval -1 失败
+ *
+ * @see recvfrom()
+ * @see http://man7.org/linux/man-pages/man2/sendto.2.html
  */
 ssize_t
 sendto(int sockfd,
@@ -327,8 +365,8 @@ sendto(int sockfd,
  * 示例:
  * @code{.c}
  * int sfd = socket(AF_UNIX, SOCKET_STREAM, 0); // 创建TCP 类型的 UNIX domain socket
- * int sfd = socket(AF_UNIX, SOCKET_STREAM, 0); // 创建UDP 类型的 UNIX domain socket
  * int sfd = socket(AF_INET, SOCKET_STREAM, 0); // 创建 IPv4 domain socket
+ * int sfd = socket(AF_INET6, SOCKET_STREAM, 0); // 创建 IPv6 domain socket
  * @endcode
  *
  * @note 在一些代码中可能会看到 PF_UNIX 而不是 AF_UNIX 常量.
@@ -347,8 +385,3 @@ socket(int domain, int type, int protocol);
  * include a file
  */
 
-/**
- * @example socket.c
- *
- * UNIX domain 中的流 socket
- */
