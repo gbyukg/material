@@ -11,8 +11,10 @@
 /**
  * @example unixDomainStreamClient.c
  * @example unixDomainStreamServer.c
- * @example unixDomainDgramServer.c
  * @example unixDomainDgramClient.c
+ * @example unixDomainDgramServer.c
+ * @example inetDomainDgramClient.c
+ * @example inetDomainDgramServer.c
  *
  * UNIX domain 中的流 socket
  */
