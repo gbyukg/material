@@ -59,6 +59,47 @@
 #define AF_INET6 10
 
 /**
+ * @brief IPv4 通配地址
+ *
+ * 如果位于一台多宿主机上的应用程序只将 socket 绑定到其中一个主机 IP 地址上,
+ * 那么该 socket 只能接受发送到该 IP 地址上的 UDP 数据报或 TCP 连接请求,
+ * 如果想要能够接收任意一个 IP 地址的连接, 将 socket 绑定到统配 IP 地址上即可.
+ *
+ * 大多数实现将其定义成了 0.0.0.0
+ *
+ * @see http://lxr.free-electrons.com/source/include/uapi/linux/in.h#L273
+ */
+#define INADDR_ANY              ((unsigned long int) 0x00000000)
+
+/**
+ * @brief IPv4 回环地址
+ *
+ * 127.0.0.1 一般被设定为回环地址(loopback), 网络中127.0.0.1/8 中的所有地址都可以
+ *被指定成 IPv4 的回环地址
+ *
+ * @see http://lxr.free-electrons.com/source/include/uapi/linux/in.h#L285
+ */
+#define INADDR_LOOPBACK         0x7f000001      /* 127.0.0.1   */
+
+/**
+ * @brief IPv4 字符串展现形式的最大长度
+ *
+ * 可用于 inet_ntop() 函数
+ *
+ * @see http://lxr.free-electrons.com/source/include/linux/inet.h#L51
+ */
+#define INET_ADDRSTRLEN         (16)
+
+/**
+ * @brief IPv6 字符串展现形式的最大长度
+ *
+ * 可用于 inet_ntop() 函数
+ *
+ * @see http://lxr.free-electrons.com/source/include/linux/inet.h#L52
+ */
+#define INET6_ADDRSTRLEN        (48)
+
+/**
  * @def SOCK_STREAM
  * @brief 流连接方式
  *
@@ -178,8 +219,8 @@ struct in_addr {
  */
 struct sockaddr_in {
     sa_family_t    sin_family; //!< 总是 AF_INET
-    in_port_t      sin_port;   //!< 16 位端口号
-    struct in_addr sin_addr;   //!< IPv4 地址, 指向 in_addr 结构
+    in_port_t      sin_port;   //!< 16 位端口号, 需要转换成网络字节序
+    struct in_addr sin_addr;   //!< IPv4 地址, 指向 in_addr 结构, 需要转换成网络字节序
 };
 
 /**
@@ -200,9 +241,9 @@ struct in6_addr {
  */
 struct sockaddr_in6 {
     sa_family_t     sin6_family;   //!< 总是 AF_INET6
-    in_port_t       sin6_port;     //!< 16 位端口号
+    in_port_t       sin6_port;     //!< 16 位端口号, 需要转换成网络字节序
     unit32_t        sin6_flowinfo; //!< IPv6 flow 信息
-    struct in6_addr sin6_addr;     //!< IPv6 地址结构
+    struct in6_addr sin6_addr;     //!< IPv6 地址结构, 需要转换成网络字节序
     unit32_t        sin6_scop_id;  //!< Scope ID
 };
 
@@ -288,6 +329,83 @@ int
 connect(int sockfd, const struct sockaddr *addr, socklen_t addrlen);
 
 /**
+ * @brief 主机字节序转换成网络字节序
+ *
+ * 由于 CPU 存在大小端模式, 不同的主机对字节的存放顺序有可能不同.
+ *   - 主机字节序: 在特定住自己上使用的字节序
+ *   - 网络字节序: 在网络中使用的统一的字节序, 大端模式
+ *
+ * 由于端口号和 IP 地址必须在网络中的所有主机之间传递并且需要被理解,
+ * 因此在将端口和 IP 存入 socket 地址结构之前必须要使用统一的网络字节序进行转换.
+ *
+ * 将 16 位的主机字节序转换成 16 位的网络字节序
+ *
+ * @return 返回 16 位的网络字节序
+ *
+ * @see htonl()
+ * @see ntohs()
+ * @see ntohl()
+ */
+uint16_t htons(uint16_t host_uint16);
+
+/**
+ * @brief 主机字节序转换成网络字节序
+ *
+ * 将 32 位的主机字节序转换成 32 位的网络字节序
+ *
+ * @return 返回 32 位的网络字节序
+ *
+ * @see htons()
+ * @see ntohs()
+ * @see ntohl()
+ */
+uint32_t htonl(uint32_t host_uint32);
+
+/**
+ * @brief IP 转 二进制
+ *
+ * 将十进制点分割的 IP 地址转换成网络字节序的二进制 IP 地址, p 表示展现(presentation),
+ * n 表示网络(network)
+ *
+ * @param domain 可用参数为 @ref AF_INET 或 @ref AF_INET6
+ * @param src_str 以字符串形式展示的 十进制点分隔 的 IP 地址
+ * @param addrptr 针对 @p domain 参数指定的值来指向一个 @ref in_addr 结构或
+ * @ref in6_addr 结构
+ *
+ * @return 判定函数是否执行成功
+ * @retval 1 成功
+ * @retval 0 @p src_str 参数格式不正确
+ * @retval -1 函数执行失败
+ *
+ * @see inet_ntop()
+ */
+int inet_pton(int domain, const char *src_str, void *addrptr);
+
+/**
+ * @brief 二进制转 IP
+ *
+ * 将二进制的网络字节序的 IP 地址转换成十进制点分隔的 IP 地址.
+ *
+ * @param domain 可用参数为 @ref AF_INET 或 @ref AF_INET6
+ * @param addrptr 针对 @p domain 参数指定的值来指向一个 @ref in_addr 结构或
+ * @ref in6_addr 结构
+ * @param dst_str 用于保存得到的以 NULL 结尾的十进制点分隔的 IP 地址的字符串
+ * @param len 指定 @p dst_str 缓冲区的大小. 如果该值太小, 则返回 NULL,
+ * 并将errno 设置成 ENOSPC, 可以使用预定义好的两个常量 @ref INET_ADDRSTRLEN
+ * 和 @ref INET6_ADDRSTRLEN, 这两个常量标示出了 IPv4 和 IPv6 地址的展现字符串
+ *的最大长度.
+ *
+ * @return 返回一个指向 展现形式的IP地址 的指针
+ * @retval NULL 函数执行失败
+ *
+ * @see inet_ntop()
+ */
+const char *inet_ntop(int domain,
+        const void *addrptr,
+        char *dst_str,
+        size_t len);
+
+/**
  * @brief 将 socket 引用的流 socket 标记为被动.
  *
  * 通过 socket() 创建的 socket 是主动的(客户端). 通过该函数将 socket 更改为 被动式的(服务器).
@@ -309,6 +427,32 @@ connect(int sockfd, const struct sockaddr *addr, socklen_t addrlen);
  */
 int
 listen(int sockfd, int backlog);
+
+/**
+ * @brief 网络字节序转换成主机字节序
+ *
+ * 将 16 位的网络字节序转换成 16 位的主机字节序
+ *
+ * @return 返回 16 位的主机字节序
+ *
+ * @see htons()
+ * @see htonl()
+ * @see ntohl()
+ */
+uint16_t ntohs(uint16_t net_uint16);
+
+/**
+ * @brief 网络字节序转换成主机字节序
+ *
+ * 将 32 位的网络字节序转换成 16 位的主机字节序
+ *
+ * @return 返回 32 位的主机字节序
+ *
+ * @see htons()
+ * @see htonl()
+ * @see ntohs()
+ */
+uint32_t ntohl(uint32_t net_uint16);
 
 /**
  * @brief 接收数据报 socket 上的消息
