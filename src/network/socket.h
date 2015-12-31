@@ -149,18 +149,19 @@
 /**
  * @brief 保存地址结构信息
  *
- * 用于保存 getaddrinfo() 函数根据主机名和服务器名获取到的地址结构信息
+ * 用于设置和保存 getaddrinfo() 函数根据主机名和服务器名获取到的地址结构信息
  *
  * <netdb.h>
  */
 struct addrinfo {
-    int    ai_flags;
+    int    ai_flags;        //!< 在获取地址结构信息使用
     int    ai_family;       //!< @ref AF_INET 或 @ref AF_INET6
     int    ai_socktype;     //!< @ref SOCK_STREAM 或 @ref SOCK_DGRAM
     int    ai_protocol;
-    size_t ai_addrlen;
+    size_t ai_addrlen;      //!< ai_addr 指向的 socket 地址结构的大小
     char   *ai_canonname;
-    struct sockaddr *ai_addr;
+    struct sockaddr *ai_addr; //!< socket 地址结构, IPv4 时指向 @ref in_addr,
+    IPv6 时指向 @ref in6_addr
     struct addrinfo *ai_next;
 };
 
