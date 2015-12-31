@@ -147,6 +147,24 @@
 #define	SOMAXCONN	128
 
 /**
+ * @brief 保存地址结构信息
+ *
+ * 用于保存 getaddrinfo() 函数根据主机名和服务器名获取到的地址结构信息
+ *
+ * <netdb.h>
+ */
+struct addrinfo {
+    int    ai_flags;
+    int    ai_family;       //!< @ref AF_INET 或 @ref AF_INET6
+    int    ai_socktype;     //!< @ref SOCK_STREAM 或 @ref SOCK_DGRAM
+    int    ai_protocol;
+    size_t ai_addrlen;
+    char   *ai_canonname;
+    struct sockaddr *ai_addr;
+    struct addrinfo *ai_next;
+};
+
+/**
  * @brief 通用地址结构
  *
  * 由于每种 socket domain 都使用了不同的地址格式. 如 UNIX domain socket 使用路径名,
@@ -195,8 +213,8 @@ struct sockaddr {
  * @see http://lxr.free-electrons.com/source/include/uapi/linux/un.h#L8
  */
 struct sockaddr_un {
-    sa_family_t sun_family; //!< 总是 AF_UNIX
-    char        sun_path[102];     //!< 以空指针结尾的存放 socket 路径名路径字符串
+    sa_family_t sun_family;     //!< 总是 AF_UNIX
+    char        sun_path[102];  //!< 以空指针结尾的存放 socket 路径名路径字符串
 };
 
 /**
@@ -329,6 +347,27 @@ bind(int sockfd, const struct sockaddr *addr, socklen_t addrlen);
  */
 int
 connect(int sockfd, const struct sockaddr *addr, socklen_t addrlen);
+
+/**
+ * @brief 根据主机名获取地址结构列表
+ *
+ * @p result 参数返回一个结构列表而不是单个结构.
+ *
+ * @param host 包含一个主机名或一个以 IPv4 点分十进制标记或 IPv6 十六进制字符串
+ *标记的数值地址字符串.
+ * @param service 包含一个服务名或一个十进制端口号
+ * @param hints 指向一个 @ref addrinfo 结构, 该结构规定了选择通过 result 返回的
+ * socket 地址结构的标准.
+ * @param result 执行一个动态分配的包含 addrinfo 结构的链表.
+ *
+ * @return 返回函数执行状态
+ * @retval 0 成功
+ * @retval 非0 失败
+ */
+int getaddrinfo(const char *host,
+        const char *service,
+        const struct addrinfo *hints,
+        struct addrinfo **result);
 
 /**
  * @brief 主机字节序转换成网络字节序
