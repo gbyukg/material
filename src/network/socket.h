@@ -358,7 +358,8 @@ connect(int sockfd, const struct sockaddr *addr, socklen_t addrlen);
  *标记的数值地址字符串.
  * @param service 包含一个服务名或一个十进制端口号
  * @param hints 指向一个 @ref addrinfo 结构, 该结构规定了选择通过 result 返回的
- * socket 地址结构的标准.
+ * socket 地址结构的标准, 此时只能设置 @ref addrinfo 结构中的 `ai_flags`,
+ * `ai_family`, `ai_socktpe` 以及 `ai_protocol` 字段.
  * @param result 执行一个动态分配的包含 addrinfo 结构的链表.
  *
  * @return 返回函数执行状态
