@@ -15,6 +15,7 @@
  * @example unixDomainDgramServer.c
  * @example inetDomainDgramClient.c
  * @example inetDomainDgramServer.c
+ * @example getIpAddress.c
  *
  * UNIX domain 中的流 socket
  */
@@ -160,8 +161,7 @@ struct addrinfo {
     int    ai_protocol;
     size_t ai_addrlen;      //!< ai_addr 指向的 socket 地址结构的大小
     char   *ai_canonname;
-    struct sockaddr *ai_addr; //!< socket 地址结构, IPv4 时指向 @ref in_addr,
-    IPv6 时指向 @ref in6_addr
+    struct sockaddr *ai_addr; //!< socket 地址结构, IPv4 时指向 @ref in_addr, IPv6 时指向 @ref in6_addr
     struct addrinfo *ai_next;
 };
 
@@ -350,23 +350,63 @@ int
 connect(int sockfd, const struct sockaddr *addr, socklen_t addrlen);
 
 /**
+ * @brief 释放 addrinfo 列表
+ *
+ * getaddrinfo() 函数会动态地为 result 引用的所有结构分配内存, 其结构是调用者
+ * 必须要在不再需要这些结构时释放他们.
+ */
+void
+freeaddrinfo(struct addrinfo *resutl);
+
+/**
  * @brief 根据主机名获取地址结构列表
  *
- * @p result 参数返回一个结构列表而不是单个结构.
+ * 将获取到的地址结构列表保存到 @p result 参数中,
+ * 需要注意的是, @p result 是一个结构列表而不是单个结构.
  *
  * @param host 包含一个主机名或一个以 IPv4 点分十进制标记或 IPv6 十六进制字符串
- *标记的数值地址字符串.
+ * 标记的数值地址字符串.
  * @param service 包含一个服务名或一个十进制端口号
  * @param hints 指向一个 @ref addrinfo 结构, 该结构规定了选择通过 result 返回的
  * socket 地址结构的标准, 此时只能设置 @ref addrinfo 结构中的 `ai_flags`,
- * `ai_family`, `ai_socktpe` 以及 `ai_protocol` 字段.
- * @param result 执行一个动态分配的包含 addrinfo 结构的链表.
+ * `ai_family`, `ai_socktpe` 以及 `ai_protocol` 字段.<BR>
+ * `hints.ai_family` 字段指定了使用返回的 socket 地址结构的域, 其取值可以使
+ * @ref AF_INET 或 @ref AF_INET6. 如果需要获取所有种类 socket 地址结构,
+ * 那么可以将这个字段的值指定为 `AF_UNSPEC`.<BR>
+ * `hints.ai_socktype` 字段指定了使用返回的 socket 地址结构的 socket 类型,
+ * 可使用的值有: @ref SOCK_DGRAM, 表示查询将会在 UDP 服务上执行,
+ * @ref SOCK_STREAM, 表示查询将会 TCP 服务上执行,
+ * 或者指定为0, 表示任意类型的 socket 都可以接受.<BR>
+ * `hints.ai_flags` 是一个位掩码, 用于改变 getaddrinfo() 的行为. 是下面中的一个
+ * 或多个取 OR 的来的.
+ *   - `AI_ADDRCONFIG`
+ *   - `AI_ALL`
+ *   - `AI_CANONNAME`
+ *   - `AI_NUMERICHOST`: 强制将 host 解释成一个数值地址字符串. 这个常量用于在
+ *   不必要解析名字时防止进行名字解析.
+ *   - `AI_NUMERICSERV`: 强制将 service 解释成一个数值端口号. 这个标记用于防止
+ *   调用任意的名字解析服务器, 因为当 service 为一个数值字符串时种种调用是没有
+ *   必要的.
+ *   - `AI_PASSIVE`: 如果 host 为 NULL, 则返回一个适合被动式打开的 socket 地址
+ *   结构. 通过 @p result 返回的 socket 地址结构的 IP 地址部分将会包含一个通配
+ *   IP 地址(即 @ref INADDR_ANY 或 @ref IN6ADDR_ANY_INET). <BR>
+ *   如果没有设置这个标记, 那么通过 @p result 返回的地址结构将能用于
+ *   connect() 和 sendto(); 如果 host 为 NULL, 那么返回的 socket 地址结构中的
+ *   IP 地址将会被设置成回环 IP 地址.
+ *
+ * @param result 获取一个动态分配的包含 @ref addrinfo 结构的链表.
  *
  * @return 返回函数执行状态
  * @retval 0 成功
  * @retval 非0 失败
+ *
+ * @note 由于 @p result 是动态分配, 使用完之后需要 调用 freeaddrinfo()
+ * 函数手动释放.
+ *
+ * @see freeaddrinfo
  */
-int getaddrinfo(const char *host,
+int
+getaddrinfo(const char *host,
         const char *service,
         const struct addrinfo *hints,
         struct addrinfo **result);
@@ -577,10 +617,3 @@ sendto(int sockfd,
  */
 int
 socket(int domain, int type, int protocol);
-
-/**
- * @include socket.c
- *
- * include a file
- */
-
