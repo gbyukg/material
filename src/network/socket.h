@@ -359,6 +359,27 @@ void
 freeaddrinfo(struct addrinfo *resutl);
 
 /**
+ * @brief 为函数 getaddrinfo() 提供错误诊断
+ *
+ * 当 getaddrinfo() 函数在发生错误时会返回一个错误列表, 用来标明错误原因.
+ *   - `EAI_ADDRFAMILY`: 在 `hints.ai_family` 中不存在 host 的地址.
+ *   - `EAI_AGAIN`: 名字解析过程中发生临时错误
+ *   - `EAI_BADFLAGS`: 在 `hints.ai_family` 中指定了一个无效的标记
+ *   - `EAI_FAIL`: 访问名字服务器时发生了无法恢复的故障
+ *   - `EAI_FAMILY`: 不支持在 `hints.ai_family` 中指定的地址族
+ *   - `EAI_MEMORY`: 内存分配故障
+ *   - `EAI_NODATA`: 没有与 host 关联的地址中规定, 但大多数实现都对其进行了定义
+ *   - `EAI_NONAME`: 未知的 host 或 service, 或者 host 和 service 都为 NULL,
+ *   或者指定了 `AI_NUMERICSERV` 同时 `service` 没有指向一个数值字符串
+ *   - `EAI_OVERFLOW`: 参数缓冲区溢出
+ *   - `EAI_SERVICE`: `hints.ai_socktype` 不支持指定的 service
+ *   - `EAI_SOCKTYPE`: 不支持指定的`hints.ai_socktype`
+ *   - `EAI_SYSTEM`: 不支持指定的 `hints.ai_socktype`
+ */
+const char
+*gai_strerror(int errcode);
+
+/**
  * @brief 根据主机名获取地址结构列表
  *
  * 将获取到的地址结构列表保存到 @p result 参数中,
