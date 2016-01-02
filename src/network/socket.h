@@ -576,6 +576,36 @@ uint16_t ntohs(uint16_t net_uint16);
 uint32_t ntohl(uint32_t net_uint16);
 
 /**
+ * @brief 专用于套接字的系统调用
+ *
+ * @param sockfd
+ * @param buffer
+ * @param length
+ * @param flags 用于修改 I/O 操作的行为, 可选值有:
+ *   - `MSG_DONTWAIT`: 让 recv() 以非阻塞方式执行. 如果没有数据可用, 那么 recv()
+ *   不会阻塞而是立刻返回, 伴随的错误码为 `EAGAIN`. 可以通过 fcntl() 把套接字设置为覅阻塞模式(O_NONBLOCK)从而达到相同的目的,
+ *   区别在于 `MSG_DONTWAIT` 允许我们在每次调用中控制非阻塞行为.
+ *   - `MSG_OOB`: 在套接字上接受带外数据
+ *   - `MSG_PEEK`: 从套接字缓冲区中获取一份请求字节的副本, 但不会将请求的字节从缓冲区中实际溢出.
+ *   这份数据稍后可以由其他的 recv() 或 read() 调用重新读取.
+ *   - `MSG_WAITALL`: 通常, recv() 调用返回的字节数比请求的字节数(@p length 参数指定)要少,
+ *   而那些字节实际上还在套接字中. 指定了 `MSG_WAITALL` 标记后将导致系统调用阻塞,
+ *   直到成功接受到 length 个字节. 但是, 就算指定了该标记, 在遇到下面情况时,
+ *   返回的字节数仍然可能会小于 @p length 长度, 情况为:
+ *     - 捕捉到一个信号
+ *     - 连接流的对端终止了连接
+ *     - 遇到了带外数据字节
+ *     - 从数据报套接字接收到的消息长度小于 @p length 长度字节
+ *     - 套接字上出现了错误
+ *
+ * @return 返回获取到的字节数
+ * @retval 0 文件结尾 EOF
+ * @retval -1 函数执行失败
+ */
+ssize_t
+recv(int sockfd, void *buffer, size_t length, int flags);
+
+/**
  * @brief 接收数据报 socket 上的消息
  *
  * @param sockfd 通过调用 socket() 函数获得的 socket 文件描述符
@@ -601,6 +631,33 @@ recvfrom(int sockfd,
         int flag,
         struct sockaddr *src_addr,
         socklen_t *addrlen);
+
+/**
+ * @brief 专用于套接字的系统调用
+ *
+ * @param sockfd
+ * @param buffer
+ * @param length
+ * @param flags 可选值:
+ *   - `MSG_DONTWAIT`: 让 send() 以非阻塞方式执行. 如果数据不能立刻传输(因为套接字发送缓冲区已满),
+ *   那么该调用不会阻塞, 而是调用失败, 伴随的错误码为 EAGAIN.
+ *   - `MSG_MORE` 在 TCP 套接字上, 这个标记实现的效果同套接字选项 TCP_SORK 完成的功能相同.
+ *   区别在于该标记可以在每次调用中对数据进行栓塞处理.<BR>
+ *   如果该选项应用于数据报套接字上时, 在连续的 send() 或 sendto() 调用中传输的数据,
+ *   数据将被打包成一个单独的数据报. 仅当下一次调用中没有指定该标记时数据才会被传输出去.
+ *   `MSG_MORE` 标记对 UNIX 域套接字没有任何效果.
+ *   - `MSG_NOSIGNAL`: 当在已连接的流式套接字上发送数据时, 如果连接的另一端已经关闭了,
+ *   指定该标记后将不会产生 SIGPIPE 信号. 想法, send() 调用将会失败,
+ *   伴随的错误码为 EPIPE. 这和忽略 SIGPIPE 信号所得到的行为相同.
+ *   区别在于该标记可以在每次调用中控制信号发送的行为.
+ *
+ * @return 返回发送出去的字节数
+ * @retval -1 函数执行失败
+ *
+ * @see recv
+ */
+ssize_t
+send(int sockfd, const void *buffer, size_t length, int flags);
 
 /**
  * @brief 向数据报 socket 中发送数据
