@@ -164,7 +164,7 @@ struct addrinfo {
     size_t ai_addrlen;      //!< ai_addr 指向的 socket 地址结构的大小
     char   *ai_canonname;
     struct sockaddr *ai_addr; //!< socket 地址结构, IPv4 时指向 @ref in_addr, IPv6 时指向 @ref in6_addr
-    struct addrinfo *ai_next;
+    struct addrinfo *ai_next; //!< 用于指向下一个 @ref addrinfo 结构
 };
 
 /**
@@ -423,7 +423,7 @@ const char
  *   必要的.
  *   - `AI_PASSIVE`: 如果 host 为 NULL, 则返回一个适合被动式打开的 socket 地址
  *   结构. 通过 @p result 返回的 socket 地址结构的 IP 地址部分将会包含一个通配
- *   IP 地址(即 @ref INADDR_ANY 或 @ref IN6ADDR_ANY_INET). <BR>
+ *   IP 地址(即 @ref INADDR_ANY 或 @ref IN6ADDR_ANY). <BR>
  *   如果没有设置这个标记, 那么通过 @p result 返回的地址结构将能用于
  *   connect() 和 sendto(); 如果 host 为 NULL, 那么返回的 socket 地址结构中的
  *   IP 地址将会被设置成回环 IP 地址.
@@ -606,6 +606,9 @@ recvfrom(int sockfd,
  * @brief 向数据报 socket 中发送数据
  *
  * @param sockfd 通过调用 socket() 函数获得的 socket 文件描述符
+ * @param buffer
+ * @param length
+ * @param flags
  * @param dest_addr 用于指定服务器端的地址信息, 根据 socket domain的不同,
  * 可能是 @ref sockaddr_un, @ref sockaddr_in, @ref sockaddr_in6 其中的一个,
  * @param addrlen @p dest_addr 大小
@@ -625,6 +628,41 @@ sendto(int sockfd,
         socklen_t addrlen);
 
 /**
+ * @brief 关闭 socket 连接
+ *
+ * 在调节子上调用 close() 会将双向通道的两端都关闭. 有时候, 只关闭连接的一端也是有用处的,
+ * 这样数据只能在一个方向上通过套接字传输.
+ *
+ * 与 close() 不同, 该函数是基于文件的, 而不是文件描述符.
+ * @code{.c}
+ * fd2 = dup(sockfd);
+ * close(fd2); // fd2 依然处于连接状态.
+ *
+ * shutdown(sockfd, SHUT_RDWR); // fd2 也会被关闭.
+ * @endcode
+ *
+ * @param sockfd 通过调用 socket() 函数获得的 socket 文件描述符
+ * @param how 设置如何关闭 socket, 可选值有:
+ *   - `SHUT_RD`: 关闭连接的读端. 之后的读操作将返回文件结尾(0).
+ *   数据仍然可以写入到套接字上.
+ *   - `SHUT_WR`: 关闭连接的写端. 一旦对端的应用程序已经将所有剩余的数据读取完毕,
+ *   它就会检测到文件结尾. 后续对本地套接字的操作将产生 SIGPIPE 信号以及 EPIPE
+ *   错误. 而由对端写入的数据仍然可以在套接字上读取. 换句话说, 这个操作允许我们在仍然能读取对端发回给我们的数据,
+ *   通过文文件结尾来通知对端应用程序本地的写断已经关闭了.
+ *   - `SHUT_RDWR`: 将连接的读端和写端都不安比. 这等同于先执行 `SHUT_RA`,
+ *   跟着在执行一次 `SHUT_WR`.
+ *
+ * @return 返回一个确定函数是否执行成功的数值
+ * @retval 0 函数执行成功
+ * @retval -1 函数执行失败
+ *
+ * @note shutdown() 函数并不会关闭文件描述符, 就算参数 @p how 指定为 `SHUTO_RDWR`,
+ * 要关闭文件描述符, 必须另外调用 close().
+ */
+int
+shutdown(int sockfd, int how);
+
+/**
  * @brief 创建一个 socket.
  *
  * @param domain 指定 socket 的通信domain, 可选值:
@@ -635,6 +673,7 @@ sendto(int sockfd,
  *   - @ref SOCK_STREAM(数据流 socket TCP)
  *   - @ref SOCK_DGRAM(数据报 socket UDP) 消息边界得到了保留, 但是数据传输是不可靠的. 消息的到达可能是无序的,重复的或者根本无法到达.
  * @param protocol 本书中一直默认使用0
+ *
  * @return 在成功时返回一个引用在后续系统调用中会用到的新创建的 socket 文件描述符
  * @retval n 大于等于 0 的文件描述符
  * @retval -1 执行失败
