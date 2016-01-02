@@ -16,6 +16,8 @@
  * @example inetDomainDgramClient.c
  * @example inetDomainDgramServer.c
  * @example getIpAddress.c
+ * @example test.c
+ * @example test_client.c
  *
  * UNIX domain 中的流 socket
  */
@@ -285,6 +287,10 @@ struct sockaddr_in6 {
  * @return 返回一个 socket 文件描述符用来表示与客户端的连接
  * @retval -1 失败
  *
+ * @see bind()
+ * @see connect()
+ * @see listen()
+ * @see socket()
  * @see http://man7.org/linux/man-pages/man2/accept.2.html
  */
 int accept(int sockfd, struct sockaddr *addr, socklen_t *addrlen);
@@ -315,6 +321,9 @@ int accept(int sockfd, struct sockaddr *addr, socklen_t *addrlen);
  * bind (sfd, (const struct sockaddr *)addr, sizeof(struct sockaddr_un));
  * @endcode
  *
+ * @see accept()
+ * @see connect()
+ * @see listen()
  * @see socket()
  * @see http://man7.org/linux/man-pages/man2/bind.2.html
  */
@@ -344,6 +353,10 @@ bind(int sockfd, const struct sockaddr *addr, socklen_t addrlen);
  * connect(sfd, (struct sockaddr_in *)&addr, sizeof(struct sockaddr_in));
  * @endcode
  *
+ * @see accept()
+ * @see bind()
+ * @see listen()
+ * @see socket()
  * @see http://man7.org/linux/man-pages/man2/connect.2.html
  */
 int
@@ -527,6 +540,10 @@ const char *inet_ntop(int domain,
  *
  * @note 无法在一个已经连接的 socket 上(即已经成功执行 connect() 的 socket 或者由 accept() 调用返回的 socket)执行 listen()
  *
+ * @see accept()
+ * @see bind()
+ * @see connect()
+ * @see socket()
  * @see http://man7.org/linux/man-pages/man2/listen.2.html
  */
 int
@@ -634,6 +651,10 @@ sendto(int sockfd,
  * 在一开始的时候, 设计人员相信单个协议族可以之多多个协议族, 即 PF 可以包含 AF_UNIX, AF_INET 和 AF_INET6 三个协议族.
  * 但现实是残酷的, 满足不了需求. 所以将现有的 PF_ 常量定义成对应的 AF_ 常量.
  *
+ * @see accept()
+ * @see bind()
+ * @see listen()
+ * @see connect()
  * @see http://man7.org/linux/man-pages/man2/socket.2.html
  */
 int
