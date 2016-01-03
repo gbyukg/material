@@ -660,6 +660,35 @@ ssize_t
 send(int sockfd, const void *buffer, size_t length, int flags);
 
 /**
+ * @brief 通过零拷贝的方式在网络中传输文件
+ *
+ * 包含在 <sys/sendfile.h>
+ *
+ * 通过 read() 和 write() 函数完全可以达到文件传输的目的, 但是如果是传输大的文件,
+ * 这种方法就会显得非常不高效, 系统首先需要通过 read() 将文件内容从缓冲区缓存写入用户空间缓冲区,
+ * 在通过 write() 函数从用户缓冲区写到内核空间, 以此才能通过套接字进行传输.
+ * 如果应用程序在发起传输之前根本不对文件内容做任何处理的话, 那么这种两步式的处理就是一种浪费.<BR>
+ * sendfiel() 就是为了防止这种多余的将文件在用户空间和内核空间进行多余的复制操作而诞生的.
+ * @image html sendfile.png
+ *
+ * @param out_fd 指向一个套接字
+ * @param in_fd 被输出的文件描述符, 该文件描述符必须是可以进行 mmap() 操作的.
+ * @param offset 如果参数 @p offset 不为 NULL, 他应该指向一个 off_t 值, 该值指定了起始文件的偏移量,
+ * 意即从 @p in_fd 指向的文件的这个位置开始, 可以传输字节. 它不会更改 @p in_fd 的偏移量.<BR>
+ * 如果该参数为 NULL, 那么从 @p in_fd 传输的字节就从当前文件偏移量处开始,
+ * 且在传输时会更新文件偏移量以反映出已传输的字节数.
+ * @param count 指定要传输的字节总数, 如果被传输的文件总长度小于 @p count,
+ * 函数将返回实际被传输的字节数.
+ *
+ * @return 返回被传输的字节数
+ * @retval -1 函数执行失败
+ *
+ * @note 不能通过该函数在两个套接字之间传送数据
+ */
+ssize_t
+sendfile(int out_fd, int in_fd, off_t *offset, size_t count);
+
+/**
  * @brief 向数据报 socket 中发送数据
  *
  * @param sockfd 通过调用 socket() 函数获得的 socket 文件描述符
