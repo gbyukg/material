@@ -446,6 +446,36 @@ getaddrinfo(const char *host,
         struct addrinfo **result);
 
 /**
+ * @brief 返回本地套接字地址
+ *
+ * @param sockfd 套接字文件描述符
+ * @param addr 指向 sockaddr 结构体的指针, 而结构体包含着套接字的地址.
+ * @param addrlen 指向用于保存 @p addr 大小的指针, 在函数执行成功后用于保存
+ * @p addrlen 实际的大小
+ *
+ * @return 返回函数执行状态
+ * @retval 0 成功
+ * @retval 非0 失败
+ */
+int
+getsockname(int sockfd, struct sockaddr *addr, socklen_t *addrlen);
+
+/**
+ * @brief 返回对端套接字地址
+ *
+ * @param sockfd 套接字文件描述符
+ * @param addr 指向 sockaddr 结构体的指针, 而结构体包含着套接字的地址.
+ * @param addrlen 指向用于保存 @p addr 大小的指针, 在函数执行成功后用于保存
+ * @p addrlen 实际的大小
+ *
+ * @return 返回函数执行状态
+ * @retval 0 成功
+ * @retval 非0 失败
+ */
+int
+getpeername(int sockfd, struct sockaddr *addr, socklen_t *addrlen);
+
+/**
  * @brief 主机字节序转换成网络字节序
  *
  * 由于 CPU 存在大小端模式, 不同的主机对字节的存放顺序有可能不同.
@@ -463,7 +493,8 @@ getaddrinfo(const char *host,
  * @see ntohs()
  * @see ntohl()
  */
-uint16_t htons(uint16_t host_uint16);
+uint16_t
+htons(uint16_t host_uint16);
 
 /**
  * @brief 主机字节序转换成网络字节序
@@ -476,7 +507,8 @@ uint16_t htons(uint16_t host_uint16);
  * @see ntohs()
  * @see ntohl()
  */
-uint32_t htonl(uint32_t host_uint32);
+uint32_t
+htonl(uint32_t host_uint32);
 
 /**
  * @brief IP 转 二进制
@@ -496,7 +528,8 @@ uint32_t htonl(uint32_t host_uint32);
  *
  * @see inet_ntop()
  */
-int inet_pton(int domain, const char *src_str, void *addrptr);
+int
+inet_pton(int domain, const char *src_str, void *addrptr);
 
 /**
  * @brief 二进制转 IP
@@ -517,7 +550,8 @@ int inet_pton(int domain, const char *src_str, void *addrptr);
  *
  * @see inet_ntop()
  */
-const char *inet_ntop(int domain,
+const char *
+inet_ntop(int domain,
         const void *addrptr,
         char *dst_str,
         size_t len);
@@ -560,7 +594,8 @@ listen(int sockfd, int backlog);
  * @see htonl()
  * @see ntohl()
  */
-uint16_t ntohs(uint16_t net_uint16);
+uint16_t
+ntohs(uint16_t net_uint16);
 
 /**
  * @brief 网络字节序转换成主机字节序
@@ -573,7 +608,8 @@ uint16_t ntohs(uint16_t net_uint16);
  * @see htonl()
  * @see ntohs()
  */
-uint32_t ntohl(uint32_t net_uint16);
+uint32_t
+ntohl(uint32_t net_uint16);
 
 /**
  * @brief 专用于套接字的系统调用
