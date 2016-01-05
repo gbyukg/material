@@ -50,6 +50,72 @@ int
 close(int fd);
 
 /**
+ * @brief 复制一个打开的文件描述符 @p oldfd.
+ * 函数返回的文件描述符与 @p oldfd 都指向同一打开的文件句柄, 并且系统保证描述符一定是编号值最低的未使用的文件描述符.
+ *
+ * @param oldfd 将要被复制的文件描述符
+ *
+ * @return 函数执行成功返回一个新复制出来的文件描述符
+ * @retval -1 函数执行失败
+ */
+int
+dup(int oldfd);
+
+/**
+ * @brief 使用给定的值复制一个打开的文件描述符.
+ * 与 dup() 函数功能一样, 唯一不同的是可以通过 @p newfd 来指定新复制的文件描述符编号.<BR>
+ * 如果又 @p newfd 参数指定的编号文件描述符之前已经打开, 那么 dup2() 会首先将其关闭.
+ * 值得注意的是, dup2() 会忽略掉在关闭期间出现的任何错误. 故此, 更为安装的做法是:
+ * 在调用 dup2() 之前, 若 @p newfd 已经打开, 应该显示调用 close() 函数来关闭.<BR>
+ * 如果 @p newfd 与 @p oldfd 相同, 那么 dup2() 函数将什么都不会做, 直接返回 @p oldfd.
+ *
+ * @param oldfd 将要被复制的文件描述符
+ * @param newfd 新复制的文件描述符的编号
+ *
+ * @return 函数执行成功返回复制出来的文件描述符
+ * @retval -1 函数执行失败
+ *
+ * @see dup2()
+ * @see dup3()
+ */
+int
+dup2(int oldfd, int newfd);
+
+/**
+ * @brief 在复制文件描述符时同时指定一个 @p flags 参数.
+ *
+ * @param oldfd 将要被复制的文件描述符
+ * @param newfd 新复制的文件描述符的编号
+ * @param flags 只支持一个标志 `O_CLOEXEC`, 这将促使内核为新文件描述符设置
+ * `close-on-exec` 标志位.
+ *
+ * @return 函数执行成功返回复制出来的文件描述符
+ * @retval -1 函数执行失败
+ *
+ * @see dup()
+ * @see dup3()
+ */
+int
+dup3(int oldfd, int newfd, int flags);
+
+/**
+ * @brief 对一个打开的文件描述符执行一系列控制操作.
+ *
+ * #include <fcntl.h>
+ *
+ * @param fd 一个已打开的文件描述符
+ * @param cmd 一系列控制参数:
+ *   - `F_GETFL`
+ *
+ * @retval -1 函数执行失败.
+ *
+ * @see dup()
+ * @see dup2()
+ */
+int
+fcntl(int fd, int cmd, ...);
+
+/**
  * @brief 改变文件偏移量
  *
  * #include <unistd.h>
@@ -132,6 +198,42 @@ lseek(int fd, off_t offset, int whence);
  */
 int
 open(const char *pathname, int flags, mode_t mode);
+
+/**
+ * @brief 从指定位置开始读取
+ * 使设置偏移量与读取操作成为原子操作
+ *
+ * @param fd 文件描述符
+ * @param buf 用于保存读取到的字节
+ * @param count 期待的要读取的字节数
+ * @param offset 文件偏移量
+ *
+ * @return 返回实际读取到的字节数
+ * @retval -1 函数执行失败
+ *
+ * @see read()
+ * @see lseek()
+ */
+ssize_t
+pread(int fd, void *buf, size_t count, off_t offset);
+
+/**
+ * @brief 从指定位置开始写入
+ * 使设置偏移量与写入操作成为原子操作
+ *
+ * @param fd 文件描述符
+ * @param buf 用于保存要写入的字节
+ * @param count 期待的要写入的字节数
+ * @param offset 文件偏移量
+ *
+ * @return 返回实际写入到文件的字节数
+ * @retval -1 函数执行失败
+ *
+ * @see write()
+ * @see lseek()
+ */
+ssize_t
+pwrite(int fd, void *buf, size_t count, off_t offset);
 
 /**
  * @brief 读取数据
