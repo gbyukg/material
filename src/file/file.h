@@ -3,6 +3,8 @@
  * @author Lock
  * @date 29 Dec 2015
  * @brief 文件系统 I/O 相关函数
+ *
+ * @image html filesystem.png
  */
 
 #include <unistd.h>
@@ -140,6 +142,35 @@ off_t
 lseek(int fd, off_t offset, int whence);
 
 /**
+ * @brief 创建临时文件
+ *
+ * #include <stdlib.h>
+ *
+ * 创建的临时文件拥有者对其拥有读写权限(其他用户没有任何权限), 且打开文件时使用了
+ * `O_EXCL` 标志, 以保证调用者以独占方式访问文件.
+ *
+ * @param template 临时文件路径, 其中最后6个字符必须为 `XXXXXX`. 这6个字符将被替换,
+ * 以保证文件名的唯一性, 且修改后的字符串将通过 @p template 参数传回. 因为会对传入的
+ * @p template 参数进行修改, 所以必须将其指定为字符串数组, 而非字符串常量
+ *
+ * @code{.c}
+ * char template[] = "/tmp/somestringXXXXXX";
+ * int fd = mkstemp(template);
+ * ...
+ * unlink(template); // 删除创建的临时文件
+ * if (close(fd) == -1)
+ *     errExit("close");
+ * @endcode
+ *
+ * @return 返回创建的临时文件的文件描述符
+ * @retval -1 函数执行失败
+ *
+ * @see tmpfile()
+ */
+int
+mkstemp(char *template);
+
+/**
  * @brief 打开文件
  *
  * #include <sys/stat.h><BR>
@@ -198,6 +229,8 @@ lseek(int fd, off_t offset, int whence);
  *
  * @return 成功返回打开文件对应的文件描述符, 系统保证了返回的文件描述符是最小整数.
  * @retval -1 函数执行失败, 并相应设置 `errno` 来表示具体错误原因
+ *
+ * @note 同一进程下的所有线程共享同一文件描述符.
  */
 int
 open(const char *pathname, int flags, mode_t mode);
@@ -278,9 +311,27 @@ int
 read(int fd, void *buffer, size_t count);
 
 /**
+ * @brief 创建一个临时文件
+ *
+ * #include <stdio.h>
+ *
+ * 以读写方式创建一个名称唯一的临时文件, 同时设置了 `O_EXCL` 标志.
+ * 文件流关闭后将自动删除临时文件.
+ *
+ * @return 返回一个新创建的文件流, 供 stdio 库函数使用.
+ * @retval NULL 函数执行失败
+ *
+ * @see mkstemp()
+ */
+FILE *
+tmpfile(void);
+
+/**
  * @brief 截断文件
  *
  * #include <unistd.h>
+ *
+ * 该函数要求在打开文件是要包含写操作权限, 且该系统调用不会修改文件偏移量.
  *
  * @param pathname 要被截断的文件路径, 如果文件名为符号链接, 则将对其进行解引用.
  * @param length 截取后文件的大小
