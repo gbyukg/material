@@ -175,6 +175,9 @@ lseek(int fd, off_t offset, int whence);
  *   如 socket, 终端, FIIFOS.
  *   - `O_DSYNC`
  *   - `O_NONBLOCK` 打开文件时设置该文件为非阻塞模式.
+ *     - 当 open() 调用不能立即打开文件, 则返回错误, 而非陷入阻塞.
+ *     - 调用 open() 成功后, 后续的 I/O 操作也是非阻塞的. 若 I/O 系统调用未能立即完成,
+ *     则可能会只传输部分数据, 或者系统调用失败, 并返回 `EAGAIN` 或 `EWOULDBLOCK` 错误.
  *   - `O_SYNC` 使每次 write 等待物理I/O操作完成, 包括由该 write 操作引起的文件属性更新所需的I/O.
  * @param mode 当使用 open() 创建一个文件时, 该标志位用于确定新创建按文件权限位.
  *   - `S_IRWXU`: owner RWX
@@ -201,6 +204,9 @@ open(const char *pathname, int flags, mode_t mode);
 
 /**
  * @brief 从指定位置开始读取
+ *
+ * #include <unistd.h>
+ *
  * 使设置偏移量与读取操作成为原子操作
  *
  * @param fd 文件描述符
@@ -219,6 +225,9 @@ pread(int fd, void *buf, size_t count, off_t offset);
 
 /**
  * @brief 从指定位置开始写入
+ *
+ * #include <unistd.h>
+ *
  * 使设置偏移量与写入操作成为原子操作
  *
  * @param fd 文件描述符
@@ -267,6 +276,43 @@ pwrite(int fd, void *buf, size_t count, off_t offset);
  */
 int
 read(int fd, void *buffer, size_t count);
+
+/**
+ * @brief 截断文件
+ *
+ * #include <unistd.h>
+ *
+ * @param pathname 要被截断的文件路径, 如果文件名为符号链接, 则将对其进行解引用.
+ * @param length 截取后文件的大小
+ *   - 若文件当前长度大于 @p length, 调用将丢弃超出部分;
+ *   - 若文件当前长度小于 @p length, 调用将在文件尾部添加一些列空字节或是一个文件空洞.
+ *
+ * @return 返回函数执行状态
+ * @retval 0 函数执行成功
+ * @retval -1 函数执行失败
+ *
+ * @see ftruncate()
+ */
+int
+truncate(const char *pathname, off_t length);
+
+/**
+ * @brief 截断文件
+ *
+ * #include <unistd.h>
+ *
+ * @param fd 要被截断的文件描述符.
+ * @param length 截取后文件的大小
+ *   - 若文件当前长度大于 @p length, 调用将丢弃超出部分;
+ *   - 若文件当前长度小于 @p length, 调用将在文件尾部添加一些列空字节或是一个文件空洞.
+ *
+ * @return 返回函数执行状态
+ * @retval 0 函数执行成功
+ * @retval -1 函数执行失败
+ *
+ * @see truncate()
+ */
+int ftruncate(int fd, off_t length);
 
 /**
  * @brief 写入数据
