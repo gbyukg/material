@@ -7,6 +7,8 @@
  * @image html filesystem.png
  *
  * # 文件缓冲区
+ * 当操作磁盘文件时, 缓冲大块数据以减少系统调用, C 语言函数库的 I/O
+ * 函数正是这么做的. 因此, 使用 stdio 库可以使编程者免于自行处理对数据的缓冲.
  */
 
 #include <unistd.h>
@@ -36,6 +38,16 @@
  * 标准错误文件描述符
 */
 #define	STDERR_FILENO	2	/* standard error file descriptor */
+
+/**
+ * @def BUFSIZ
+ *
+ * 系统默认缓冲区大小<BR>
+ * 系统会自动设定该大小为最适合的大小来作为输入输出缓冲区的大小.
+ * 并且保证至少为 `256` 个字节.<BR>
+ * 也可以通过查看 fstat() 函数返回的结构中的 `st_blksize` 字段来设定最适合系统缓冲区大小的值.
+ */
+#define BUFSIZ 1
 
 /**
  * @brief 关闭指定的文件描述符
@@ -393,10 +405,99 @@ int ftruncate(int fd, off_t length);
  * 执行完 write() 函数后, 该函数立即返回, 数据只是被保存到了内核缓冲区高速缓存之中,
  * 之后等待某一时刻等待内核将其缓冲区里的数据刷新到磁盘上.<BR>
  * 如果再此期间, 另一进程试图访问这几个字节, 那么内核将自动从缓冲区高速缓存中提供这些数据,
- * 而不是从文件中(读取过期的内容).
+ * 而不是从文件中(读取过期的内容)
  *
  * @see read()
  * @see pwrite()
  */
 int
 write(int fd, void *buffer, size_t count);
+
+/**
+ * @brief 设置一个 stdio 流的缓冲模式
+ *
+ * #include <stdio.h>
+ *
+ * 控制 stdio 库使用缓冲的形式
+ *
+ * @param stream 要修改的文件流.
+ * @param buf 两种情况:
+ *   - 如果不为 NULL, 那么其指向 @p size 大小的内存块以作为 stream 的缓冲区.
+ * 因为 stdio 库将要使用 @p buf 指向的缓冲区, 所以应该以 <B>动态</B> 或
+ * <B>静态</B> 在堆中为该缓冲区分配一块内存空间(使用 malloc() 或类似函数),
+ * 而不是分配在栈上的函数本地变量. 否则函数返回时将销毁其栈针导致混乱.<BR>
+ *   - 如果 @p buf 为NULL, 那么 `stdio` 库自动分配一个缓冲区. SUSv3 允许但不强制库实现使用
+ *   size 来确定其缓冲区的大小. glibc 实现会在该场景下忽略 @p size 参数.
+ * @param mode 指定了缓冲类型:
+ *   - `_IONBF`: 不对 I/O 进行缓冲, 每个 stdio 库函数将立即调用 write() 或者
+ *   read(), 并且忽略 @p buf 和 @p size 参数, 可以分别指定两个参数为 `NULL` 和 `0`.
+ *   stderr 默认属于这一类, 从而保证错误能立即输出
+ *   - `_IOLBF`: 采用行缓冲 I/O. 指代终端设备的流默认属于这种类型. 对于输出流,
+ *   在输出一个换行符(除非缓冲区已经填满)前将缓冲数据. 对于输入流, 每次读取一行数据.
+ *   - `_IOFBF`: 采用全缓冲 I/O. 单次读, 写数据(通过 read() 或 write()) 的大小与该缓冲区相同.
+ *   指代磁盘的流默认采用此模式.
+ * @param size 配合 @p buf 一起使用, 确定缓冲区大小.
+ *
+ * @retval 0 函数执行成功
+ * @retval 非0 函数执行失败
+ *
+ * @note 该函数必须在调用任何其他 stdio 函数之前调用.
+ * setvbuf() 调用将影响后续在 @p stream 流上进行的所有 stdio 操作.
+ *
+ * @see setbuf()
+ * @see setbuffer()
+ */
+#include <stdio.h>
+int
+setvbuf(FILE *stream, char *buf, int mode, size_t size);
+
+/**
+ * @brief 类似 setvbuf()
+ *
+ * 只是仅提供了两种缓冲设置: 无缓冲(`_IONBF`) 或 全缓冲(`_IOFBF`).
+ *
+ * @param stream 要修改的文件流.
+ * @param buf 当该参数为 NULL 时, 设置 @p stream 为 `_IONBF`, 否则设置为 `_IOFBF`,
+ * 且缓冲区大小为 @ref BUFSIZ.
+ *
+ * @return 该函数无返回结果.
+ *
+ * @see setvbuf()
+ * @see setbuffer()
+ */
+void
+setbuf (FILE *stream, char *buf);
+
+/**
+ * @brief 类似 setvbuf, 但允许调用者指定 buf 缓冲区大小.
+ *
+ * @param stream 要修改的文件流.
+ * @param buf 缓冲区
+ * @param size 如果 @p buf 不为 `NULL`, 则用来指定缓冲区大小
+ *
+ * @return 无返回值
+ *
+ * @see setvbuf()
+ * @see setbuf()
+ */
+void
+setbuffer(FILE *stream, char *buf, size_t size);
+
+/**
+ * @brief 刷新缓冲区
+ *
+ * 无论当前采用何种缓冲模式, 在任何时候, 都可以使用 fflush() 库函数强制将
+ * stdin 输出流中的数据(即通过 write()) 刷新到<B>内核缓冲区</B>中.<BR>
+ * 此函数将刷新指定指定 @p stream 的输出缓冲区.<BR>
+ * 也可以将该函数应用于输入流, 但这将导致内核丢去当前所有已经缓冲的输入数据.
+ * (当程序下一次尝试从流中读取数据时, 将重新装满缓冲区.)<BR>
+ * 当关闭相应流时, 将自动刷新其 stdio 缓冲区.
+ *
+ * @param stream 指定要刷新的流文件, 若此参数为 `NULL`, 则刷新所有的 stdio 缓冲区.
+ *
+ * @return 返回函数执行状态.
+ * @retval 0 函数执行成功
+ * @retval EOF 函数执行失败
+ */
+int
+fflush(FILE *stream);
