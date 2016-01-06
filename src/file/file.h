@@ -6,9 +6,23 @@
  *
  * @image html filesystem.png
  *
- * # 文件缓冲区
- * 当操作磁盘文件时, 缓冲大块数据以减少系统调用, C 语言函数库的 I/O
- * 函数正是这么做的. 因此, 使用 stdio 库可以使编程者免于自行处理对数据的缓冲.
+ * # 文件 I/O 缓冲区
+ * 缓冲区分为 <B>用户空间缓冲区</B> 与 <B>内核缓冲区高速缓存</B>.
+ * 可以通过控制这两个缓冲区域, 来影响文件的读写效率或是一些行为.
+ * 如 read() 和 write() 函数的行为.
+ *
+ * ### stdio 库缓冲区
+ * 当操作磁盘文件时, 缓冲大块数据以减少系统调用, C 语言函数库的 I/O 函数
+ * 比如( fprintf(), fscanf(), fgets(), fputs(), fgetc())
+ * 正是这么做的. 因此, 使用 stdio 库可以使编程者免于自行处理对数据的缓冲.
+ *
+ * ### 内核缓冲
+ * 强制刷新内湖缓冲区到输出文件是可能的, 例如数据库应用要确保在继续操作前将输出真正的写入磁盘.
+ * SUSv3 的两种同步方式:
+ *   - `synchronized I/O data integrity completion`: 保证数据完整性,
+ *   仅仅确保数据和一小部分文件属性(如文件大小)被正确地写入到了磁盘上.
+ *   - `synchronized I/O file integrity completion`: 保证文件完整性,
+ *   确保数据以及文件的所有属性都已经被正确的写入到了磁盘上.
  */
 
 #include <unistd.h>
@@ -218,12 +232,15 @@ mkstemp(char *template);
  *   - `O_ASYNC` 当对于 open() 调用所返回的文件描述符可以实施I/O操作时,
  *   系统会产生一个信号通知进程. 这一特性被称为信号驱动I/O, 仅对特定类型文件有效,
  *   如 socket, 终端, FIIFOS.
- *   - `O_DSYNC`
  *   - `O_NONBLOCK` 打开文件时设置该文件为非阻塞模式.
  *     - 当 open() 调用不能立即打开文件, 则返回错误, 而非陷入阻塞.
  *     - 调用 open() 成功后, 后续的 I/O 操作也是非阻塞的. 若 I/O 系统调用未能立即完成,
  *     则可能会只传输部分数据, 或者系统调用失败, 并返回 `EAGAIN` 或 `EWOULDBLOCK` 错误.
+ *   - `O_DSYNC`: 要求写操作按照 synchronized I/O data integrity 来执行,
+ *   类似于 fdatasync().
  *   - `O_SYNC` 使每次 write 等待物理I/O操作完成, 包括由该 write 操作引起的文件属性更新所需的I/O.
+ *   即 synchronized I/O file integrity completion, 类似于 fsync() 函数.<BR>
+ *   该参数会极大影响后续对文件操作的 I/O 效率.
  * @param mode 当使用 open() 创建一个文件时, 该标志位用于确定新创建按文件权限位.
  *   - `S_IRWXU`: owner RWX
  *   - `S_IRUSR`: owner R
@@ -501,3 +518,58 @@ setbuffer(FILE *stream, char *buf, size_t size);
  */
 int
 fflush(FILE *stream);
+
+/**
+ * @brief Synchronized I/O file integrity completion
+ *
+ * <unistd.h>
+ *
+ * 该系统调用将使缓冲数据和与打开的 @p fd 相关的所有数据都刷新到磁盘上.<BR>
+ * 该函数仅在对磁盘设备(或者至少是磁盘的高速缓存)的传递完成后, fsycn() 调用才会返回.
+ *
+ * @param fd 指定要操作的文件标示符
+ *
+ * @return 返回函数执行状态
+ * @retval 0 函数执行成功
+ * @retval -1 函数执行失败
+ *
+ * @see sync()
+ * @see fdatasync()
+ */
+int
+fsync(int fd);
+
+/**
+ * @brief Synchronized I/O data integrity completion
+ *
+ * <unistd.h>
+ *
+ * 该系统函数可能会减少对磁盘操作的次数, 因为会减少某些文件属性的传递.
+ *
+ * @param fd 指定要操作的文件标示符
+ *
+ * @return 返回函数执行状态
+ * @retval 0 函数执行成功
+ * @retval -1 函数执行失败
+ *
+ * @see fsync()
+ * @see sync()
+ */
+int
+fdatasync(int fd);
+
+/**
+ * @brief 更新全部内核缓冲区
+ *
+ * <unistd.h>
+ *
+ * sync() 系统调用会使包含更新文件信息的所有内核缓冲区(即数据块, 指针块, 元数据等)
+ * 刷新到磁盘上.
+ *
+ * @return 该函数无返回值.
+ *
+ * @see fsync()
+ * @see fdatasync()
+ */
+void
+sync(void);
