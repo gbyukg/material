@@ -63,3 +63,131 @@ getpid(void);
  */
 pid_t
 getppid(void);
+
+/**
+ * @brief 获取环境变量
+ *
+ * <stdlib.h>
+ *
+ * 获取指定 @p name 的环境变量的值
+ *
+ * @param name 指定要获取的环境变量的名称
+ *
+ * @return 返回一个字符串指针
+ * @retval NULL 无指定的环境变量
+ *
+ * @note SUSv3 规定, 应用程序不应该修改 getenv() 函数返回的字符串,
+ * 这是由于该字符串实际上属于环境变量的一部分(即 name=value 字符串的 value 部分).
+ * @note SUSv3 允许 getenv() 函数的实现使用静态分配的缓冲区返回执行结果.
+ * 后续对 getenv(), setenv(), putenv() 或者 unsetenv() 的函数调用可以重写该缓冲区.
+ * 如果想要保留获取到的环境变量, 应先将返回的字符串复制到其他位置,
+ * 之后方可对上述函数发起调用.
+ *
+ * @see putenv()
+ * @see setenv()
+ * @see unsetenv()
+ * @see clearenv()
+ */
+char *
+getenv(const char *name);
+
+/**
+ * @brief 设置环境变量
+ *
+ * 该函数会将将 @p string 直接设置为环境变量的一部分, 因此在执行完该函数后如果对该字符串内容进行修改,
+ * 将会影响到后续该环境变量的值.<BR>
+ * 也正是如此, 应该将 @p string 参数设置为静态变量或者全局变量, 保证该字符串不会被消除.
+ *
+ * @param string 指向 `name=value` 形式的字符串.
+ *
+ * @return 返回函数执行状态
+ * @retval 0 函数执行成功
+ * @retval 非0 函数执行失败
+ *
+ * @code{.c}
+ * // 设置环境变量 NAME=ZZL;
+ * static char *setName = "NAME=ZZL";
+ * putenv(setName);
+ * @endcode
+ *
+ * @see getenv()
+ * @see putenv()
+ * @see setenv()
+ * @see unsetenv()
+ * @see clearenv()
+ */
+int
+putenv(char *string);
+
+/**
+ * @brief 设置环境变量
+ *
+ * <stdlib.h>
+ *
+ * 不同于 putenv() 函数, setenv() 在执行时会自动复制其参数 @p name 和 @p value
+ * 的值, 因此后续对这两个参数的任何改动都不会影响到环境变量 @p name 的值.
+ *
+ * @param name 要设置的环境变量名称
+ * @param value 新环境变量对应的值
+ * @param overwrite 用于决定是否重写已经存在的环境变量的值:
+ *   - 非0 总是将环境变量 @p name 的值设置为 @p value
+ *   - 0 如果环境变量 @p name 已经存在, 则不做任何操作, 保留原环境变量 @p name 的值.
+ *
+ * @return 返回函数状态执行结果
+ * @retval 0 函数执行成功
+ * @retval -1 函数执行失败
+ *
+ * @code{.c}
+ * // 设置环境变量 NAME=ZZL
+ * setenv("NAME", "ZZL", 1);
+ * @endcode
+ *
+ * @see getenv()
+ * @see putenv()
+ * @see setenv()
+ * @see unsetenv()
+ * @see clearenv()
+ */
+int
+setenv(const char *name, const char *value, int overwrite);
+
+/**
+ * @brief 移除环境变量
+ *
+ * <stdlib.h>
+ *
+ * 从系统环境变量中移除 @p name 环境变量.
+ *
+ * @param name 指定要移除的环境变量名称.
+ *
+ * @return 返回函数执行的结果
+ * @retval 0 函数执行成功
+ * @retval -1 函数执行失败
+ *
+ * @see getenv()
+ * @see putenv()
+ * @see setenv()
+ * @see unsetenv()
+ * @see clearenv()
+ */
+int
+unsetenv(const char *name);
+
+/**
+ * @brief 清除所有环境变量
+ *
+ * #define _BSD_SOURCE
+ * <stdlib.h>
+ *
+ * @return 返回函数执行的结果
+ * @retval 0 函数执行成功
+ * @retval 非0 函数执行失败
+ *
+ * @see getenv()
+ * @see putenv()
+ * @see setenv()
+ * @see unsetenv()
+ * @see clearenv()
+ */
+int
+clearenv(void);
