@@ -262,6 +262,9 @@ mkstemp(char *template);
  * @retval -1 函数执行失败, 并相应设置 `errno` 来表示具体错误原因
  *
  * @note 同一进程下的所有线程共享同一文件描述符.
+ *
+ * @see fileno();
+ * @see fdopen();
  */
 int
 open(const char *pathname, int flags, mode_t mode);
@@ -463,6 +466,7 @@ write(int fd, void *buffer, size_t count);
  *
  * @see setbuf()
  * @see setbuffer()
+ * @see fflush()
  */
 #include <stdio.h>
 int
@@ -481,6 +485,7 @@ setvbuf(FILE *stream, char *buf, int mode, size_t size);
  *
  * @see setvbuf()
  * @see setbuffer()
+ * @see fflush()
  */
 void
 setbuf (FILE *stream, char *buf);
@@ -496,6 +501,7 @@ setbuf (FILE *stream, char *buf);
  *
  * @see setvbuf()
  * @see setbuf()
+ * @see fflush()
  */
 void
 setbuffer(FILE *stream, char *buf, size_t size);
@@ -573,3 +579,37 @@ fdatasync(int fd);
  */
 void
 sync(void);
+
+/**
+ * @brief 返回文件描述符
+ *
+ * <stdio.h>
+ *
+ * @param stream 要转换的文件流
+ *
+ * @return 返回文件描述符
+ * @retval -1 函数执行失败
+ *
+ * @see fdopen()
+ */
+int
+fileno(FILE *stream);
+
+/**
+ * @brief 返回文件流
+ *
+ * <stdio.h>
+ *
+ * 根据给定的文件描述符, 创建一个使用该描述符进行文件 I/O 的相应流.
+ *
+ * @param fd 给定的文件描述符
+ * @param mode 与 fopen() 函数中 mode 参数含义相同: r, w, a.
+ * 如果该参数与文件描述符 @p fd 的访问模式不一致, 函数调用将失败.
+ *
+ * @return 返回文件流
+ * @retval NULL 函数执行失败
+ *
+ * @see fileno()
+ */
+FILE *
+fdopen(int fd, const char *mode);
