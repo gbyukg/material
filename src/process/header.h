@@ -179,6 +179,8 @@ unsetenv(const char *name);
  * #define _BSD_SOURCE
  * <stdlib.h>
  *
+ * 该函数实际就是将全局变量 environ 变量赋值为 NULL.
+ *
  * @return 返回函数执行的结果
  * @retval 0 函数执行成功
  * @retval 非0 函数执行失败
