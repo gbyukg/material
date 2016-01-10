@@ -55,6 +55,8 @@
  * 在 32 位 Linux 系统中, 它使一个有符号整数, 可以表示的日期范围从
  * 1901/12/13 20:45:52 至 2038/1/19 03:14:07.<BR>
  * 64 位系统则没有这中问题.
+ *
+ * @see http://lxr.free-electrons.com/source/include/linux/types.h#L69
  */
 typedef __kernel_time_t time_t;
 
