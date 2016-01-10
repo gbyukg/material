@@ -22,6 +22,7 @@
  * 日历时间: 无论地址位置如何, UNIX 系统内部对时间的表示方式均是以自 Epoch
  * 以来的秒数来度量的, Epoch 亦即通用协调时间(UTC, 以前也称为格林威治标准时间,
  * 过 GMT)的 1970-01-01 日早晨零点.
+ * @image html time.png
  * @author Lock
  * @version V1.0
  * @date 2016-01-10
@@ -33,23 +34,23 @@
  * @brief 用秒数保存的时间
  */
 struct timeval {
-    time_t      tv_sec;  //<! 从 1970.1.1:00:00:00 秒开始的秒数
-    suseconds_t tv_usec; //<! 微秒级的精度
+    time_t      tv_sec;  //!< 从 1970.1.1:00:00:00 秒开始的秒数
+    suseconds_t tv_usec; //!< 微秒级的精度
 };
 
 /**
  * @brief 保存日期和时间的结构体
  */
 struct tm {
-    int tm_sec;     //<! 秒数 (0-60)
-    int tm_min;     //<! 分钟 (0-60)
-    int tm_hour;    //<! 小时 (0-23)
-    int tm_mday;    //<! 日期 (1-31)
-    int tm_mon;     //<! 月份 (0-11)
-    int tm_year;    //<! 年份 (自从1900开始算起, 其值为当前年份 - 1900)
-    int tm_wday;    //<! 星期 (Sunday = 0)
-    int tm_yday;    //<! 一年中的第几天(0-365; 1月1号 = 0)
-    int tm_isdst;   //<! 夏令时标识符，实行夏令时的时候，tm_isdst为正. 不实行夏令时的进候，tm_isdst为0；不了解情况时，tm_isdst()为负。
+    int tm_sec;     //!< 秒数 (0-60)
+    int tm_min;     //!< 分钟 (0-60)
+    int tm_hour;    //!< 小时 (0-23)
+    int tm_mday;    //!< 日期 (1-31)
+    int tm_mon;     //!< 月份 (0-11)
+    int tm_year;    //!< 年份 (自从1900开始算起, 其值为当前年份 - 1900)
+    int tm_wday;    //!< 星期 (Sunday = 0)
+    int tm_yday;    //!< 一年中的第几天(0-365; 1月1号 = 0)
+    int tm_isdst;   //!< 夏令时标识符，实行夏令时的时候，tm_isdst为正. 不实行夏令时的进候，tm_isdst为0；不了解情况时，tm_isdst()为负。
 };
 
 /**
