@@ -45,10 +45,23 @@
  * @date 2016-01-10
  */
 
+
+
 #include <sys/time.h>
 
 /**
+ * @brief 时间类型
+ *
+ * 在 32 位 Linux 系统中, 它使一个有符号整数, 可以表示的日期范围从
+ * 1901/12/13 20:45:52 至 2038/1/19 03:14:07.<BR>
+ * 64 位系统则没有这中问题.
+ */
+typedef __kernel_time_t time_t;
+
+/**
  * @brief 用秒数保存的时间
+ *
+ * @see gettimeofday()
  */
 struct timeval {
     time_t      tv_sec;  //!< 从 1970.1.1:00:00:00 秒开始的秒数
@@ -56,7 +69,7 @@ struct timeval {
 };
 
 /**
- * @brief 保存日期和时间的结构体
+ * @brief 保存分解的日期和时间的结构体
  */
 struct tm {
     int tm_sec;     //!< 秒数 (0-60)
@@ -107,10 +120,14 @@ gettimeofday(struct timeval *tv, struct timezone *tz);
  * 返回的值与 gettimeofday() 中返回的 @ref timeval 结构体中的 @ref tv_sec 相同.
  *
  * @param timep 如果该参数不为 NULL, 还会将返回的秒数置于 @p timep 所指向的位置.
+ * 不过通常将该参数设置为 NULL
  *
  * @return 返回自 Epoch 以来的秒数
  * @retval -1 函数执行失败
  *
+ * @code{.c}
+ * t = time(NULL);
+ * @endcode
  * @see gettimeofday()
  */
 time_t
