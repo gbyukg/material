@@ -71,6 +71,20 @@ struct tm {
 };
 
 /**
+ * @brief 用于保存进程时间的结构
+ *
+ * 数据类型 clock_t 使用时钟计时单元(clocl tick)为单位度量时间的整型值,
+ * 习惯用语计算 @ptr tms 结构体的4个字段. 可以调用 sysconf(_SC_CLK_TCK)
+ * 来获得没秒包含的时钟计时单元数, 然后用这个数组除以 clock_t 转换成秒.
+ */
+struct tms {
+    clock_t tms_utime;  //!< 用户模式下 CPU 所占用时间
+    clock_t tms_stime;  //!< 内核模式下 CPU 所占用时间
+    clock_t tms_cutime; //!< 用户 CPU 与 子进程用户 CPU 时间总和
+    clock_t tms_cstime; //!< 内核 CPU 与 子进程内核 CPU 时间总和
+};
+
+/**
  * @brief 获取当前的日历时间
  *
  * @param tv 用于保存获取到的日历时间
