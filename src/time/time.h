@@ -224,3 +224,52 @@ asctime(const struct tm *timeptr);
 size_t
 strftime(char *outstr, size_t maxsize, const char *format,
         const struct tm *timeptr);
+
+/**
+ * @brief 服务于定时器函数
+ */
+struct itimerval {
+    struct timeval it_interval; //!< 设置触发器触发周期的时间,如果该字段所指向的 @ref timeval 中的值都为0, 则定时器为一次性的.
+    struct timeval it_value;    //!< 指定距离定时器到期的延迟时间. 如果该字段所指向的 @ref timeval 中的值都为0, 则屏蔽之前所有的定时器.
+};
+
+/**
+ * @brief 创建一个间隔式定时器.
+ *
+ * <sys/time.h>
+ *
+ * 这种定时器会在未来某个时间点到期, 并与此后(可选地)每隔一段时间到期一次.<BR>
+ * 进程只能拥有 @p which 可以指定的三种定时器中的一种. 当第二次调用 setitimer()
+ * 时, 修改已有定时器的属性要符合 @p which 中的类型.<BR>
+ * 通过 setitimer() 函数创建的定时器可以跨越 exec() 调用而得以保存, 但由 fork()
+ * 创建的子进程并不集成该定时器.
+ *
+ * @param which 指定何种类型的定时器:
+ *   - `ITIMER_REAL` 创建以真实时间倒计时的定时器. 到期时会产生 @ref SIGALARM 信号.
+ *   - `ITIMER_VIRTUAL` 创建以进程虚拟时间(用户模式下的 CPU 时间)倒计时的定时器.
+ *   到期会产生信号 @ref SIGVTALRM.
+ *   - `ITIMER_PROF` 创建一个 profiling 定时器, 以进程时间(用户态与内核态 CPU 时间的总和)倒计时,
+ *   到期会产生 @ref SIGPROF 信号.
+ * @param new_value 通过 @ref itimerval 结构, 设置定时器为一次性定时器还是周期性定时器.<BR>
+ * @param old_value 如果该参数不为 NULL, 则用于保存调用 setitimer() 函数之前系统的定时器信息.
+ *
+ * @return 返回函数的执行状态
+ * @retval 0 函数执行成功
+ * @retval-1 函数执行失败
+ */
+int
+setitimer(int which, const struct itimerval *new_value,
+        struct itimerval *old_value);
+
+/**
+ * @brief 返回由 @p which 指定的定时器的当前状态
+ *
+ * @param which 指定何种类型的定时器.
+ * @param curr_value 保存获取到的定时器信息.
+ *
+ * @return 返回函数执行状态
+ * @retval 0 函数执行成功.
+ * @retval -1 函数执行失败.
+ */
+int
+getitime(int which, struct itimerval *curr_value);
