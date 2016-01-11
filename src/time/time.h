@@ -86,11 +86,12 @@ struct tm {
 };
 
 /**
- * @brief 用于保存进程时间的结构
+ * @brief 用于保存进程的执行时间的结构
  *
  * 数据类型 clock_t 使用时钟计时单元(clocl tick)为单位度量时间的整型值,
- * 习惯用语计算 @ptr tms 结构体的4个字段. 可以调用 sysconf(_SC_CLK_TCK)
- * 来获得没秒包含的时钟计时单元数, 然后用这个数组除以 clock_t 转换成秒.
+ * 习惯用于计算 @ref tms 结构体中的4个字段.<BR>
+ * 可以调用 sysconf(_SC_CLK_TCK)
+ * 来获得每秒包含的时钟计时单元数, 然后用这个数组除以 clock_t 转换成秒.
  */
 struct tms {
     clock_t tms_utime;  //!< 用户模式下 CPU 所占用时间
