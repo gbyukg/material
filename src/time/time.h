@@ -128,7 +128,7 @@ gettimeofday(struct timeval *tv, struct timezone *tz);
  *
  * <time.h>
  *
- * 返回的值与 gettimeofday() 中返回的 @ref timeval 结构体中的 @ref tv_sec 相同.
+ * 返回的值与 gettimeofday() 中返回的 @ref timeval 结构体中的 tv_sec 相同.
  *
  * @param timep 如果该参数不为 NULL, 还会将返回的秒数置于 @p timep 所指向的位置.
  * 不过通常将该参数设置为 NULL
@@ -324,7 +324,7 @@ sleep(unsigned int seconds);
 /**
  * @brief 高分辨率休眠
  *
- * #define _POSIX_C_SOURCE 199309<BR>
+ * \#define _POSIX_C_SOURCE 199309<BR>
  * <time.h>
  *
  * 相对于 sleep() 函数, 能够以更高分辨率来设置休眠间隔时间.

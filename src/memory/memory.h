@@ -34,7 +34,7 @@
  *
  * 将堆的内存边界设置为 @p end_data_segment 所指定的位置. 由于虚拟内存以 页
  * 为单位进行分配, @p end_data_segment 实际会四舍五入到下一个内存页的边界处.<BR>
- * 当试图将 program break 设置为一个低于其初始值(即低于 @end)的位置时,
+ * 当试图将 program break 设置为一个低于其初始值(即低于 @p end)的位置时,
  * 有可能会导致无法预知的行为.
  *
  * @param end_data_segment 指定要设置的 program break 的位置.
