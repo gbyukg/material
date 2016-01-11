@@ -100,6 +100,14 @@ struct tms {
 };
 
 /**
+ * @brief 用于 nanosleep() 函数.
+ */
+struct timespec {
+    time_t tv_sec;  //!< 秒数
+    log    tv_nsec; //!< 纳秒值
+};
+
+/**
  * @brief 获取当前的日历时间
  *
  * @param tv 用于保存获取到的日历时间
@@ -256,6 +264,8 @@ struct itimerval {
  * @return 返回函数的执行状态
  * @retval 0 函数执行成功
  * @retval-1 函数执行失败
+ *
+ * @see alarm()
  */
 int
 setitimer(int which, const struct itimerval *new_value,
@@ -273,3 +283,61 @@ setitimer(int which, const struct itimerval *new_value,
  */
 int
 getitime(int which, struct itimerval *curr_value);
+
+/**
+ * @brief 简单的创建一次性定时器函数
+ *
+ * 定时器到期时, 会响调用进程发送 @ref SIGALRM 信号.<BR>
+ * 调用 alarm() 会覆盖对定时器的前一个设置.
+ * @param seconds 定时器到期的秒数. 如何设置为 0, 则屏蔽现有的定时器.
+ *
+ * @return 返回定时器的前一个设置距离到期的剩余秒数, 如果未设置定时器, 则返回0.
+ *
+ * @note alarm() 函数有可能与 setitimer() 在同一进程中有可能会共享同一定时器,
+ * 因此系统中只能选择这两个函数中的一个函数用于设置定时器.
+ *
+ * @see setitimer()
+ */
+unsigned int
+alarm(unsigned int seconds);
+
+/**
+ * @brief 低分辨率休眠
+ *
+ * <unistd.h>
+ *
+ * 暂停调用今晨的执行达数秒之久, 或在捕获到信号后恢复进程的运行.<BR>
+ * 如果休眠正常结束, 返回返回0. 如果因为信号而中断休眠, sleep() 将返回剩余的(未休眠的)秒数.<BR>
+ * 由于系统负载原因, 内核可能会在完成 slepp() 的一段(通常很短)时间后才对进程重新加以调度.
+ *
+ * @param seconds 指定要休眠的时间(秒).
+ *
+ * @return 返回 0 或者未休眠的秒数.
+ *
+ * @note sleep() 在有些系统上可能是通过 alarm() 函数来实现, 为了考虑可移植性,
+ * 应避免这3个函数同时出现.
+ */
+unsigned int
+sleep(unsigned int seconds);
+
+/**
+ * @brief 高分辨率休眠
+ *
+ * #define _POSIX_C_SOURCE 199309<BR>
+ * <time.h>
+ *
+ * 相对于 sleep() 函数, 能够以更高分辨率来设置休眠间隔时间.
+ *
+ * SUSv3规定, 该函数不可以使用信号来实现. 这意味着, 与 sleep() 不同,
+ * 即使与 alarm() 或 setitimer() 混用, 也不会危及程序的可移植性.
+ *
+ * @param request 指向一个 @ref timespec 结构,设置休眠时间.
+ * @param remain 指向一个 @ref timespec 结构, 如果不为 NULL, 则返回剩余的休眠时间.
+ *
+ * @return 返回函数执行状态
+ * @retval 0 休眠完成
+ * @retval -1 函数执行失败
+ * @retval n 剩余未休眠的时间
+ */
+int
+nanosleep(const struct timespec *request, struct timespec *remain);
