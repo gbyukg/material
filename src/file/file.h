@@ -264,6 +264,8 @@ mkstemp(char *template);
  * @note 同一进程下的所有线程共享同一文件描述符.
  *
  * @see fileno();
+ * @see fopen();
+ * @see freopen()
  * @see fdopen();
  */
 int
@@ -609,7 +611,67 @@ fileno(FILE *stream);
  * @return 返回文件流
  * @retval NULL 函数执行失败
  *
+ * @see open()
  * @see fileno()
+ * @see fopen()
+ * @see freopen()
  */
 FILE *
 fdopen(int fd, const char *mode);
+
+/**
+ * @brief 根据文件路径名打开一个文件流
+ *
+ * <stdio.h>
+ *
+ * @param pathname 文件路径信息
+ * @param type 指定对该 I/O 流的读写方式:
+ *   - `r` 或 `rb`: 只读(O_RDONLY)
+ *   - `w` 或 `wb`: 把文件截断至0长, 或为只写而创建(O_WRONLY|O_CREAT|O_TRUNC)
+ *   - `a` 或 `ab`: 追加: 为在文件尾部而打开, 或为写而创建(O_WRONLY|O_CREAT|O_APPEND)
+ *   - `r+` 或 `r+b` 或 `rb+`: 为读和写而打开(O_RDWR)
+ *   - `w+` 或 `w+b` 或 `wb+`: 把文件截断至 0 长, 或为读写而打开(O_RDWR|O_CREAT|O_TRUNC)
+ *   - `a+` 或 `a+b` 或 `ab+`: 为在文件尾读和写而打开或创建(O_RDWR|O_CREAT|O_APPEND)
+ *
+ * @see open()
+ * @see fileno();
+ * @see freopen()
+ * @see fdopen();
+ */
+FILE *
+fopen(const char *restrict pathname, const char *restrict type);
+
+/**
+ * @brief 打开一个文件流
+ *
+ * <stdio.h>
+ *
+ * 在一个指定的流上打开一个指定的文件, 如若该流已经打开, 则先关闭该流.
+ * 若该流已经定向, 则使用 freopen() 清除该定向.
+ * 此函数一般用于将一个指定的文件打开为一个预定义的流: 标准输入, 标准输出或标准错误.
+ *
+ * @param pathname
+ * @param type
+ * @param fp
+ *
+ * @return
+ *
+ * @see open()
+ * @see fopen()
+ * @see fdopen()
+ */
+FILE *
+fropen(const char *restrict pathname, const char *restrict type,
+        FILE *restrict fp);
+
+/**
+ * @brief 关闭打开的流
+ *
+ * @param fp 指定要关闭的流
+ *
+ * @return 返回函数执行状态
+ * @retval 0 函数执行成功
+ * @retval EOF 出错
+ */
+int
+fclose(FILE *fp);
