@@ -675,3 +675,146 @@ fropen(const char *restrict pathname, const char *restrict type,
  */
 int
 fclose(FILE *fp);
+
+/**
+ * @brief 读取一个字符
+ *
+ * getc(), fgetc() 和 getchar() 不管是出错, 还是到达文件结尾, 都会返回同样的值.
+ * 为了区别错误和文件结尾, 需要使用 ferror() 和 feof() 函数判断.
+ *
+ * getc() 可以被实现为宏, 而 fgetc() 必须是函数. 因此:
+ *   - getc() 的参数不应当是具有副作用的表达式, 因为它可能会被计算多次.
+ *   - 因为 fgetc() 一定是个函数, 所以可以得到其地址. 这就允许将 fgetc()
+ *   的地址作为一个参数传递给另一个函数.
+ *   - 调用 fget() 所需时间很可能比调用 getc() 要长.
+ *
+ * @param fp 要读取的文件流
+ *
+ * @return 返回下一个字符
+ * @retval EOF 文件达到结尾或出错
+ *
+ * @see fgetc()
+ * @see getchar()
+ */
+int
+getc(FILE *fp);
+
+/**
+ * @brief 读取一个字符
+ *
+ * @param fp 要读取的文件流
+ *
+ * @return 返回下一个字符
+ * @retval EOF 文件达到结尾或出错
+ *
+ * @see getc()
+ * @see getchar()
+ */
+int
+fgetc(FILE *fp);
+
+/**
+ * @brief 从标准输入中读取一个字符
+ *
+ * @return 返回下一个字符
+ * @retval EOF 文件达到结尾或出错
+ *
+ * @see getc()
+ * @see fgetc()
+ */
+int
+getchar(void);
+
+/**
+ * @brief 读取一行的文件
+ *
+ * @param buf 用于存储获取到的字符串
+ * @param n 缓冲区大小
+ * @param fp 指定要读取的文件流
+ *
+ * @return 返回 @p buf
+ * @retval NULL 函数执行失败或达到文件尾端, 通过 ferror() 或 feof() 判断.
+ */
+char *
+fgets(char *restrict buf, int n, FILE *restrict fp);
+
+/**
+ * @brief 从标准输入中读取字符
+ *
+ * @param buf
+ *
+ * @return
+ */
+char *
+gets(char *buf);
+
+/**
+ * @brief 判断读取文件流是否出错
+ *
+ * @param fp 文件流
+ *
+ * @retval 非0 真
+ * @retval 0 假
+ */
+int
+ferror(FILE *fp);
+
+/**
+ * @brief 判断是否达到文件结尾
+ *
+ * @param fp 文件流
+ *
+ * @retval 非0 真
+ * @retval 0 假
+ */
+int
+feof(FILE *fp);
+
+/**
+ * @brief 写入一个字符
+ *
+ * 与 getc() 一样, putc() 可被实现为宏.
+ *
+ * @param c 要写入的字符
+ * @param fp 流
+ *
+ * @return 函数执行成功, 则返回 @p c
+ * @retval EOF 执行错误
+ *
+ * @see fputc()
+ * @see putchar()
+ */
+int
+putc(int c, FILE *fp);
+
+/**
+ * @brief 写入一个字符
+ *
+ * @param c 要写入的字符
+ * @param fp 流
+ *
+ * @return 函数执行成功, 则返回 @p c
+ * @retval EOF 执行错误
+ *
+ * @see putc()
+ * @see putchar()
+ */
+int
+fputc(int c, FILE *fp);
+
+/**
+ * @brief 向标准输出中写入字符
+ *
+ * @param c 要写入的字符
+ *
+ * @return 函数执行成功, 则返回 @p c
+ * @retval EOF 执行错误
+ *
+ * @see putc()
+ * @see fputc()
+ */
+int
+putchar(int c);
+
+size_t
+fread(void *restrict ptr, size_t size, size_t nobj, FILE *restrict fp);
