@@ -573,6 +573,10 @@ fdatasync(int fd);
  * sync() 系统调用会使包含更新文件信息的所有内核缓冲区(即数据块, 指针块, 元数据等)
  * 刷新到磁盘上.
  *
+ * sync() 只是将所有修改过的块缓冲区排入写队列, 然后就返回. 它并不等待实际写操作结束.
+ *
+ * 通常称为 update 的系统守护进程会周期性的(一般30秒)调用 sync() 函数.
+ *
  * @return 该函数无返回值.
  *
  * @see fsync()
@@ -846,7 +850,71 @@ puts(const char *str);
  * @param nobj
  * @param fp
  *
- * @return
+ * @return 返回读取到的对象个数
  */
 size_t
 fread(void *restrict ptr, size_t size, size_t nobj, FILE *restrict fp);
+
+/**
+ * @brief 二进制文件写入
+ *
+ * @param ptr
+ * @param size
+ * @param nobj
+ * @param fp
+ *
+ * @return 返回写入的对象个数
+ */
+size_t
+fwrite(const void *restrict ptr, size_t size, size_t nobj, FILE *restrict fp);
+
+/**
+ * @brief 向文件流写入格式化字符串
+ *
+ * @param fp 指定要写入的文件流
+ * @param format 字符串格式
+ * @param ...
+ *
+ * @return 执行成功, 则返回输出字符数. 失败则返回负值.
+ */
+int
+fprintf(FILE *restrict fp, const char *restrict format, ...);
+
+/**
+ * @brief 向文件描述符中写入格式化字符串
+ *
+ * @param fd 要写入的文件描述符
+ * @param format 格式化字符串
+ * @param ...
+ *
+ * @return 执行成功, 则返回输出字符数. 失败则返回负值.
+ */
+int
+dprintf(int fd, const char *restrict format, ...);
+
+/**
+ * @brief 向指定的缓冲区中写入格式化字符串
+ *
+ * @param buf 缓冲区地址
+ * @param format 格式化字符串
+ * @param ...
+ *
+ * @return 返回将要存入数组的字符数. 失败则返回负值.
+ */
+int
+sprintf(char *restrict buf, const char *restrict format, ...);
+
+/**
+ * @brief 向指定的缓冲区中写入格式化字符串
+ *
+ * 该函数同时指定了允许向缓冲区传入的最大字符数, 超过的字符都将被丢弃掉.
+ *
+ * @param buf 缓冲区地址
+ * @param n 允许的最大字符数
+ * @param format 格式化字符串
+ * @param ...
+ *
+ * @return 返回将要存入数组的字符数. 失败则返回负值.
+ */
+int
+snprintf(char *restrict buf, size_t n, const char *restrict format, ...);
