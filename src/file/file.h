@@ -66,7 +66,7 @@
 /**
  * @brief 关闭指定的文件描述符
  *
- * #include <unistd.h>
+ * <unistd.h>
  *
  * 文件描述符属于有限资源,当一个文件描述符不再使用时, 手动关闭该文件描述符是良好的编程习惯.
  *
@@ -131,7 +131,7 @@ dup3(int oldfd, int newfd, int flags);
 /**
  * @brief 对一个打开的文件描述符执行一系列控制操作.
  *
- * #include <fcntl.h>
+ * <fcntl.h>
  *
  * @param fd 一个已打开的文件描述符
  * @param cmd 一系列控制参数:
@@ -148,7 +148,7 @@ fcntl(int fd, int cmd, ...);
 /**
  * @brief 改变文件偏移量
  *
- * #include <unistd.h>
+ * <unistd.h>
  *
  * 对于每个打开的文件, 系统内核会记录其文件偏移量, 用于指示下一次执行 read() 或
  * write() 操作的文件起始位置. 文件的第一个字节的偏移量为 0.<BR>
@@ -172,7 +172,7 @@ lseek(int fd, off_t offset, int whence);
 /**
  * @brief 创建临时文件
  *
- * #include <stdlib.h>
+ * <stdlib.h>
  *
  * 创建的临时文件拥有者对其拥有读写权限(其他用户没有任何权限), 且打开文件时使用了
  * `O_EXCL` 标志, 以保证调用者以独占方式访问文件.
@@ -201,8 +201,8 @@ mkstemp(char *template);
 /**
  * @brief 打开文件
  *
- * #include <sys/stat.h><BR>
- * #include <fcntl.h>
+ * <sys/stat.h><BR>
+ * <fcntl.h>
  *
  * 打开通过参数 @p pathname 指定的文件, 必须指定 `O_RDONLY`, `O_WRONLY` 和 `O_RDWR`
  * 中的一个标志位.
@@ -274,7 +274,7 @@ open(const char *pathname, int flags, mode_t mode);
 /**
  * @brief 从指定位置开始读取
  *
- * #include <unistd.h>
+ * <unistd.h>
  *
  * 使设置偏移量与读取操作成为原子操作
  *
@@ -295,7 +295,7 @@ pread(int fd, void *buf, size_t count, off_t offset);
 /**
  * @brief 从指定位置开始写入
  *
- * #include <unistd.h>
+ * <unistd.h>
  *
  * 使设置偏移量与写入操作成为原子操作
  *
@@ -316,7 +316,7 @@ pwrite(int fd, void *buf, size_t count, off_t offset);
 /**
  * @brief 读取数据
  *
- * #include <unistd.h>
+ * <unistd.h>
  *
  * 从文件描述符 @p fd 所指代的打开文件中读取数据.<BR>
  * 该函数返回的读取到的字符数有可能小于 @p count 指定的请求的字节数.
@@ -356,7 +356,7 @@ read(int fd, void *buffer, size_t count);
 /**
  * @brief 创建一个临时文件
  *
- * #include <stdio.h>
+ * <stdio.h>
  *
  * 以读写方式创建一个名称唯一的临时文件, 同时设置了 `O_EXCL` 标志.
  * 文件流关闭后将自动删除临时文件.
@@ -372,7 +372,7 @@ tmpfile(void);
 /**
  * @brief 截断文件
  *
- * #include <unistd.h>
+ * <unistd.h>
  *
  * 该函数要求在打开文件是要包含写操作权限, 且该系统调用不会修改文件偏移量.
  *
@@ -393,7 +393,7 @@ truncate(const char *pathname, off_t length);
 /**
  * @brief 截断文件
  *
- * #include <unistd.h>
+ * <unistd.h>
  *
  * @param fd 要被截断的文件描述符.
  * @param length 截取后文件的大小
@@ -438,7 +438,7 @@ write(int fd, void *buffer, size_t count);
 /**
  * @brief 设置一个 stdio 流的缓冲模式
  *
- * #include <stdio.h>
+ * <stdio.h>
  *
  * 控制 stdio 库使用缓冲的形式
  *
@@ -470,7 +470,6 @@ write(int fd, void *buffer, size_t count);
  * @see setbuffer()
  * @see fflush()
  */
-#include <stdio.h>
 int
 setvbuf(FILE *stream, char *buf, int mode, size_t size);
 
@@ -816,5 +815,38 @@ fputc(int c, FILE *fp);
 int
 putchar(int c);
 
+/**
+ * @brief 一次写入一行
+ *
+ * @param str 要写入的字符串
+ * @param fp 要写入的文件流
+ *
+ * @retval 非负 函数执行成功
+ * @retval EOF 函数执行失败
+ */
+int
+fputs(const char *restrict str, FILE *restrict fp);
+
+/**
+ * @brief 向标准输出写入一行文件
+ *
+ * @param str
+ *
+ * @retval 非负 函数执行成功
+ * @retval EOF 函数执行失败
+ */
+int
+puts(const char *str);
+
+/**
+ * @brief 二进制读取
+ *
+ * @param ptr
+ * @param size
+ * @param nobj
+ * @param fp
+ *
+ * @return
+ */
 size_t
 fread(void *restrict ptr, size_t size, size_t nobj, FILE *restrict fp);
