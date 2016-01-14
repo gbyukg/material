@@ -58,6 +58,8 @@ void
  * 通过 kill() 函数, 一个进程可以向另一个进程 @p pid 发送一个指定的信号 @p sig.
  * 之所以叫 kill, 是因为早期 UNIX 实现中大多数信号的默认行为是终止进程.
  *
+ * kill() 会将信号传递给某个进程下的任意一个线程中.
+ *
  * 一个进程要发送信号到另一个进程, 需要适当权限才可以, 其规则:
  *   - 特权级进程可以向任何进程发送信号.
  *   - 以 root 用户和组运行的 `init` 进程(进程号1), 是一种特例,
@@ -82,6 +84,35 @@ void
  *   - `EPERM`: 进程无权向指定的进程发送信号.
  *   若 @p pid 指定了一组进程, 那么只要可以向其中一个进程发送信号, 函数则执行成功.
  *   - `ESRCH`: 指定的进程不存在
+ *
+ * @see raise()
+ * @see killpg()
  */
 int
 kill(pid_t pid, int sig);
+
+/**
+ * @brief 向进程自身发送信号
+ *
+ * 当进程调用 raise() 向自身发送信号时, 信号将立即传递, 即, 在 raise() 返回调用者之前.
+ *
+ * @code{.c}
+ * // 对于单线程来说, 相当于
+ * kill(getpid(), sig);
+ *
+ * // 对于支持线程的系统, 会将 raise() 实现为:
+ * pthread_kill(pthread_self(), sig);
+ * @endcode
+ *
+ * @param sig 要发送的信号
+ *
+ * @return 返回函数执行状态
+ * @retval 0 函数执行成功
+ * @retval 非0 函数执行失败, 调用该函数唯一可能发生的错误为 `EINVAL`,
+ * 即 @p sig 无效.
+ *
+ * @see kill()
+ * @see killpg()
+ */
+int
+raise(int sig);
