@@ -116,3 +116,24 @@ kill(pid_t pid, int sig);
  */
 int
 raise(int sig);
+
+/**
+ * @brief 向指定进程组中的所有成员发送信号
+ *
+ * @code{.c}
+ * // 等同于
+ * kill(-pgrp, sig);
+ * @endcode
+ *
+ * @param pgrp 指定的进程组
+ * @param sig 要发送的信号
+ *
+ * @return 返回函数执行状态
+ * @retval 0 函数执行成功
+ * @retval -1 函数执行失败
+ *
+ * @see kill()
+ * @see raise()
+ */
+int
+killpg(pid_t pgrp, int sig);
