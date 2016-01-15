@@ -380,3 +380,14 @@ sigpending(sigset_t *sig);
  */
 int
 sigaction(int sig, const struct sigaction *act, struct sigaction *oldact);
+
+/**
+ * @brief 等待信号
+ *
+ * 该函数将暂停进程的执行, 直至信号处理器函数中断该函数调用为止
+ * (或者直至一个未处理信号终止进程为止).
+ *
+ * @return 总是返回 -1, 并将 `errno` 设置为 `EINTR`.
+ */
+int
+pause(void);
