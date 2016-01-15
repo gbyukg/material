@@ -26,6 +26,16 @@
 #include <signal.h>
 
 /**
+ * @brief 信号集数据结构
+ *
+ * 用于保存一组信号信息
+ *
+ */
+typedef struct {
+    unsigned long sig[_NSIG_WORDS];
+} sigset_t;
+
+/**
  * @brief 改变信号处置
  *
  * 该函数较 sigaction() 简单, 但是对于跨平台程序, 觉不可使用该函数.
@@ -137,3 +147,117 @@ raise(int sig);
  */
 int
 killpg(pid_t pgrp, int sig);
+
+/**
+ * @brief 显示信号描述
+ *
+ * 每个信号都有一串与之相关的可打印说明. 这些描述符位于数组 `sys_siglist` 中.
+ * 例如, 可以用 `sys_siglist[SIGPIPE]` 来获取对 `SIGPIPE` 信号的描述.
+ * @code{.c}
+ * extern const char *const sys_siglist[];
+ * @endcode
+ *
+ * 与之使用 `sys_siglist` 数组相比, 该函数对 @p sig 参数进行边界检查,
+ * 然后返回一枚指针, 指向针对该信号的可打印描述符字符串, 或者是当信号无效时,
+ * 指向错误字符串.
+ *
+ * strsignal() 对本地设置敏感, 所以显示信号描述时会使用本地语言.
+ *
+ * @param sig 指定要显示的信号
+ *
+ * @return 返回描述字符串的指针
+ */
+char *
+strsignal(int sig);
+
+/**
+ * @brief 初始化一个未包含任何成员的信号集
+ *
+ * @param set 要初始化的信号集
+ *
+ * @return 返回函数执行状态
+ * @retval 0 函数执行成功
+ * @retval -1 函数执行失败
+ *
+ * @see sigfillset()
+ * @see sigaddset()
+ * @see sigdelset()
+ * @see sigismember()
+ *
+ * @note 在使用信号集之前, 必须要使用 sigempty() 或 sigfillset() 函数对信号集进行初始化操作.
+ */
+int
+sigemptyset(sigset_t *set);
+
+/**
+ * @brief 初始化一个包含了所有信号的信号集
+ *
+ * @param set 要初始化的信号集
+ *
+ * @return 返回函数执行状态
+ * @retval 0 函数执行成功
+ * @retval -1 函数执行失败
+ *
+ * @see sigfillset()
+ * @see sigaddset()
+ * @see sigdelset()
+ * @see sigismember()
+ *
+ * @note 在使用信号集之前, 必须要使用 sigempty() 或 sigfillset() 函数对信号集进行初始化操作.
+ */
+int
+sigfillset(sigset_t *set);
+
+/**
+ * @brief 向一个通过 sigemptyset() 或 sigfillset() 初始化过的信号集中增加信号.
+ *
+ * @param set 信号集
+ * @param sig 要增加的信号
+ *
+ * @return 返回函数执行状态
+ * @retval 0 函数执行成功
+ * @retval -1 函数执行失败
+ *
+ * @see sigemptyset()
+ * @see sigfillset()
+ * @see sigdelset()
+ * @see sigismember()
+ */
+int
+sigaddset(sigset_t *set, int sig);
+
+/**
+ * @brief 向一个通过 sigemptyset() 或 sigfillset() 初始化过的信号集中删除指定信号.
+ *
+ * @param set 信号集
+ * @param sig 要删除的信号
+ *
+ * @return 返回函数执行状态
+ * @retval 0 函数执行成功
+ * @retval -1 函数执行失败
+ *
+ * @see sigemptyset()
+ * @see sigfillset()
+ * @see sigaddset()
+ * @see sigismember()
+ */
+int
+sigdelset(sigset_t *set, int sig);
+
+/**
+ * @brief 测试给定的信号是否存在于指定的信号集中
+ *
+ * @param set 信号集
+ * @param sig 要测试的信号
+ *
+ * @return 返回测试状态
+ * @retval 1 要测试的信号 @p sig 存在于信号集 @p set 中.
+ * @retval 0 不存在
+ *
+ * @see sigemptyset()
+ * @see sigfillset()
+ * @see sigaddset()
+ * @see sigdelset()
+ */
+int
+sigismember(const sigset_t *set, int sig);
