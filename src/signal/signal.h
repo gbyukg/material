@@ -261,3 +261,44 @@ sigdelset(sigset_t *set, int sig);
  */
 int
 sigismember(const sigset_t *set, int sig);
+
+/**
+ * @brief 修改进程的信号掩码
+ *
+ * 通过调用 sigprocmask() 函数, 可以随时向进程的信号掩码中增加或移除信号.
+ *
+ * SUSv3 规定, 如果有任何等待信号因对 sigprocmask() 的调用而解除了锁定,
+ * 那么在调用此函数返回前至少会传递一个信号. 换言之, 如果解除了对某个等待信号的锁定,
+ * 那么会立刻将该信号传递给进程.
+ *
+ * 系统调用将忽略试图阻塞 `SIGKILL` 和 `SIGSTOP` 信号的请求.
+ * 如果试图阻塞这些信号, sigprocmask() 函数既不会予以关注, 也不会产生错误.
+ *
+ * @param how 指定了修改进程的信号掩码方式:
+ *   - `SIG_BLOCK`: 将 @p set 指向的信号集内的所有信号添加到当前的信号掩码中.
+ *   - `SIG_UNBLOCK`: 将 @p set 指向的信号集内的所有信号从当前信号掩码中移除.
+ *   即使要解除的信号当前并未处于阻塞状态, 也不会返回错误.
+ *   - `SIG_SETMASK`: 将 @p set 指向的信号集设置为当前的信号掩码.
+ * @param set 要设置的信号集
+ * @param oldset 若不为 NULL, 则其指向一个 @ref sigset_t 结构缓冲区,
+ * 用于返回之前的信号掩码.
+ *
+ * @return 返回函数执行状态
+ * @retval 0 函数执行成功
+ * @retval -1 函数执行失败
+ */
+int
+sigprocmask(int how, const sigset_t *set, sigset_t *oldset);
+
+/**
+ * @brief 获取当前进程中正处于阻塞的信号集
+ *
+ * @param sig 用于保存获取到的信号集, 在通过调用 sigismember()
+ * 来确定某个信号是否正处于阻塞状态.
+ *
+ * @return 返回函数执行状态
+ * @retval 0 函数执行成功
+ * @retval -1 函数执行失败
+ */
+int
+sigpending(sigset_t *sig);
