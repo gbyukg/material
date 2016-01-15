@@ -353,6 +353,8 @@ sigprocmask(int how, const sigset_t *set, sigset_t *oldset);
 /**
  * @brief 获取当前进程中正处于阻塞的信号集
  *
+ * 如果修改了对等待信号的处置, 那么当后来解除对信号的锁定时, 将根据新的处置来处理信号.
+ *
  * @param sig 用于保存获取到的信号集, 在通过调用 sigismember()
  * 来确定某个信号是否正处于阻塞状态.
  *
@@ -370,7 +372,7 @@ sigpending(sigset_t *sig);
  * 之外的所有信号.
  * @param act 一个指向 @ref sigaction 结构体的指针, 用于描述如何处置信号 @p sig.
  * 如果仅对现有的信号处置感兴趣, 可将该参数设置为 NULL.
- * @param oldact
+ * @param oldact 获取之前的信号处置信息, 可以设置为 NULL.
  *
  * @return 返回函数执行状态
  * @retval 0 函数执行成功
