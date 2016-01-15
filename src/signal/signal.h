@@ -32,8 +32,68 @@
  *
  */
 typedef struct {
-    unsigned long sig[_NSIG_WORDS];
+    unsigned long sig[_NSIG_WORDS]; //!< 信号信息
 } sigset_t;
+
+/**
+ * @brief siginfo
+ */
+siginfo_t {
+    int      si_signo;     //!< Signal number
+    int      si_errno;     //!< An errno value
+    int      si_code;      //!< Signal code
+    int      si_trapno;    //!< Trap number that caused
+                           //!<  hardware-generated signal
+                           //!<  (unused on most architectures)
+    pid_t    si_pid;       //!< Sending process ID
+    uid_t    si_uid;       //!< Real user ID of sending process
+    int      si_status;    //!< Exit value or signal
+    clock_t  si_utime;     //!< User time consumed
+    clock_t  si_stime;     //!< System time consumed
+    sigval_t si_value;     //!< Signal value
+    int      si_int;       //!< POSIX.1b signal
+    void    *si_ptr;       //!< POSIX.1b signal
+    int      si_overrun;   //!< Timer overrun count;
+                           //!<  POSIX.1b timers
+    int      si_timerid;   //!< Timer ID; POSIX.1b timers
+    void    *si_addr;      //!< Memory location which caused fault
+    long     si_band;      //!< Band event (was int in
+                           //!<  glibc 2.3.2 and earlier)
+    int      si_fd;        //!< File descriptor
+    short    si_addr_lsb;  //!< Least significant bit of address
+                           //!<  (since Linux 2.6.32)
+    void    *si_call_addr; //!< Address of system call instruction
+                           //!<  (since Linux 3.5)
+    int      si_syscall;   //!< Number of attempted system call
+                           //!<  (since Linux 3.5)
+    unsigned int si_arch;  //!< Architecture of attempted system call
+                           //!<  (since Linux 3.5)
+};
+
+/**
+ * @brief 用于 sigaction() 函数
+ */
+struct sigaction {
+    void (*sa_handler)(int);    //!< 处理函数地址, 或是 `SIG_IGN` 和 `SIG_DFL` 之一.
+    sigset_t sa_mask;           //!< 执行处理函数时需要被暂时阻塞的信号.
+                                //!< 当调用信号处理程序时, 会在调用信号处理器之前,
+                                //!< 将该组信号中当前未处于进程掩码之列的任何信号自动添加到进程掩码中.
+                                //!< 这些信号将保留在信号掩码中,直至信号处理器返回返回.
+                                //!< 届时将自动从信号掩码中删除这些信号.<BR>
+                                //!< 此外, 对引发处理程序调用的信号也将自动添加到信号掩码中.
+                                //!< 这意味着, 当正在执行处理程序时, 如果同一信号第二次抵达,
+                                //!< 信号处理程序将不会递归中断自己. 由于不会对遭阻塞的信号进行排队处理,
+                                //!< 如果在处理器程序执行过程中重复产生这些信号的任何信号, 稍后对信号的传递是一次性的.
+    int sa_flags;               //!< 位掩码, 指定用于控制信号处理过程中的各种选项, 可选择有:
+                                //!<    - `SA_NOCLDSTOP`: 若 sig 为 `SIGCHLD` 信号, 则当因接受因信号而停止或回复某一子进程时, 将不会产生次信号.
+                                //!<    - `SA_NOCLDWAIT`: 若 sig 为 `SIGCHLD` 信号, 当子进程终止时, 不会将其转化为僵尸进程.
+                                //!<    - `SA_NODEFER`: 捕获该信号时, 不会将该信号自动添加到进程掩码中去.
+                                //!<    - `SA_ONSTACK`: 针对此信号带哦用处理器函数时, 使用了由 sigaltstack() 安装的备选栈.
+                                //!<    - `SA_RESETHAND`: 当捕获该信号时, 会在调用处理器函数之前就爱那个信号处置重置为默认值(即 `SIG_DFL`).
+                                //!<    - `SA_RESTART`: 自动重启由信号处理器程序中断的系统调用.
+                                //!<    - `SA_SIGINFO`: 调用信号处理器程序时携带了额外参数, 其中提供了关于信号的深入信息.
+    void (*sa_restorer)(void);  //!< 未使用
+};
 
 /**
  * @brief 改变信号处置
@@ -302,3 +362,21 @@ sigprocmask(int how, const sigset_t *set, sigset_t *oldset);
  */
 int
 sigpending(sigset_t *sig);
+
+/**
+ * @brief 设置信号处理函数
+ *
+ * @param sig 想要获取或设置的信号编号. 该参数可以是出去 `SIGKILL` 和 `SIGSTOP`
+ * 之外的所有信号.
+ * @param act 一个指向 @ref sigaction 结构体的指针, 用于描述如何处置信号 @p sig.
+ * 如果仅对现有的信号处置感兴趣, 可将该参数设置为 NULL.
+ * @param oldact
+ *
+ * @return 返回函数执行状态
+ * @retval 0 函数执行成功
+ * @retval -1 函数执行失败
+ *
+ * @see signal()
+ */
+int
+sigaction(int sig, const struct sigaction *act, struct sigaction *oldact);
