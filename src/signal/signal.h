@@ -414,6 +414,17 @@ int
 pause(void);
 
 /**
+ * @brief 异常终止进程
+ *
+ * 函数 abort() 通过产生 `SIGABRT` 信号来终止调用进程.
+ * 对 SIGABRT 的默认动作是产生核心转储文件并终止进程.
+ *
+ * SUSv3 要求, 无论阻塞和忽略 `SIGABRT` 信号, abort() 调用均不受影响.
+ */
+void
+abort(void);
+
+/**
  * @brief 将信号处理函数设置在备选栈中.
  *
  * 需要指定 @ref sigaction 中的 `SA_ONSTACK` 标志位.
