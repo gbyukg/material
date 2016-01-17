@@ -74,7 +74,10 @@ siginfo_t {
  * @brief 用于 sigaction() 函数
  */
 struct sigaction {
-    void (*sa_handler)(int);    //!< 处理函数地址, 或是 `SIG_IGN` 和 `SIG_DFL` 之一.
+    union {
+        void (*sa_handler)(int); //!< @ref sa_flags 没有设置 `SA_SIGINFO` 标志位时使用的信号处理函数.
+        void (*sa_sigaction)(int, siginfo_t *, void *); //!< @ref sa_flags 中设置了 `SA_SIGINFO` 标志位时使用的信号处理函数.
+    } __sigaction_handler;      //!< 处理函数地址, 或是 `SIG_IGN` 和 `SIG_DFL` 之一.
     sigset_t sa_mask;           //!< 执行处理函数时需要被暂时阻塞的信号.
                                 //!< 当调用信号处理程序时, 会在调用信号处理器之前,
                                 //!< 将该组信号中当前未处于进程掩码之列的任何信号自动添加到进程掩码中.
@@ -94,6 +97,22 @@ struct sigaction {
                                 //!<    - `SA_SIGINFO`: 调用信号处理器程序时携带了额外参数, 其中提供了关于信号的深入信息.
     void (*sa_restorer)(void);  //!< 未使用
 };
+
+/**
+ * @brief 用于设置信号备选栈信息
+ *
+ * @see sigaltstack()
+ */
+typedef struct {
+    void   *ss_sp;      //!< 信号处理函数的起始地址, 在实际使用信号栈时, 内核对将 ss_sp 值自动对齐与硬件架构相适宜的地址边界
+    int    ss_flags;    //!< 标志位, 可选值有:
+                        //!<   - `SS_ONSTACK`: 当在获取备选栈信息时, 在返回的信息中该标志位如果已经被设置,
+                        //!<   则说明进程正在备选信号栈上执行. 当进程已经在备选栈运行时,
+                        //!<   试图调用 sigaltstack() 来创建一个新的备选信号栈将会阐释一个错误(EPERM)
+                        //!<   - `SS_DISABLE`: 在 old_sigstack 中返回, 比奥斯当前不存在已创建的备选信号栈.
+                        //!<   如果在 sigstack 中指定, 则会禁用当前已创建的备选信号栈.
+    size_t ss_size;     //!< 备选栈大小
+} stack_t;
 
 /**
  * @brief 改变信号处置
@@ -393,3 +412,20 @@ sigaction(int sig, const struct sigaction *act, struct sigaction *oldact);
  */
 int
 pause(void);
+
+/**
+ * @brief 将信号处理函数设置在备选栈中.
+ *
+ * 需要指定 @ref sigaction 中的 `SA_ONSTACK` 标志位.
+ *
+ * @param sigstack 指向一个 @ref stack_t 类型的结构指针,
+ * 用于设置新备选信号栈位置及属性信息. 当 @p old_sigstack 不为 NULL 时,
+ * 该参数可以设置为 NULL.
+ * @param old_sigstack 若不为 NULL, 则返回上一备选栈信息.
+ *
+ * @return 返回函数执行状态
+ * @retval 0 函数执行成功
+ * @retval -1 函数执行失败
+ */
+int
+sigaltstack(const stack_t sigstack, stack_t *old_sigstack);
