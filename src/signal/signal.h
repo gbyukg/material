@@ -387,7 +387,7 @@ sigpending(sigset_t *sig);
 /**
  * @brief 设置信号处理函数
  *
- * @param sig 想要获取或设置的信号编号. 该参数可以是出去 `SIGKILL` 和 `SIGSTOP`
+ * @param sig 想要获取或设置的信号编号. 该参数可以是除去 `SIGKILL` 和 `SIGSTOP`
  * 之外的所有信号.
  * @param act 一个指向 @ref sigaction 结构体的指针, 用于描述如何处置信号 @p sig.
  * 如果仅对现有的信号处置感兴趣, 可将该参数设置为 NULL.
