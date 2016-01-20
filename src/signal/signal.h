@@ -94,6 +94,9 @@ struct sigaction {
                                 //!<    - `SA_ONSTACK`: 针对此信号带哦用处理器函数时, 使用了由 sigaltstack() 安装的备选栈.
                                 //!<    - `SA_RESETHAND`: 当捕获该信号时, 会在调用处理器函数之前就爱那个信号处置重置为默认值(即 `SIG_DFL`).
                                 //!<    - `SA_RESTART`: 自动重启由信号处理器程序中断的系统调用.
+                                //!<    当发起一个阻塞系统调用后阻塞了系统执行(如 read()) 时, 该进程接受到了一个已经为其创建了信号处理函数的信号时,
+                                //!<    当信号处理函数执行完成后, 系统默认的行为是系统阻塞函数 (read()) 调用失败, 并设置 `errno` 为 `EINTR`.
+                                //!<    在为信号设置信号处理函数时, 使用该标志位可阻止这种情况, 即系统函数不会调用失败, 而是继续阻塞系统调用.
                                 //!<    - `SA_SIGINFO`: 调用信号处理器程序时携带了额外参数, 其中提供了关于信号的深入信息.
     void (*sa_restorer)(void);  //!< 未使用
 };
@@ -440,3 +443,22 @@ abort(void);
  */
 int
 sigaltstack(const stack_t sigstack, stack_t *old_sigstack);
+
+/**
+ * @brief 修改信号的 @ref SA_RESTART 标志
+ *
+ * @param sig 要修改的信号
+ * @param flag 设置的标志位:
+ *   - `1`: 中断阻塞的系统调用的执行
+ *   - '0': 自动重启阻塞的系统调用
+ *
+ * @return 返回函数执行状态
+ * @retval 0 函数执行成功
+ * @retval -1 函数执行失败
+ *
+ * @see sigaction()
+ *
+ * @note SUSv4 标记 siginterrupt() 为已废止, 并推荐使用 sigaction() 替代.
+ */
+int
+siginterrupt(int sig, int flag);
