@@ -20,6 +20,11 @@
  * @file memory.h
  * @brief 内存相关函数
  *
+ * 与 malloc() 和 free() 相关的函数都不数据线程安全函数,
+ * 因为 malloc() 和 free() 都操作一个共享链表, 用于控制栈中的内存位置及大小等关系,
+ * 一旦在执行这两个函数的过程中其他线程也调用了这2个函数, 将导致链表错乱,
+ * 引发不可知的行为.
+ *
  * @image html process_memory.png
  *
  * @author Lock
