@@ -99,6 +99,9 @@ struct sigaction {
                                 //!<    在为信号设置信号处理函数时, 使用该标志位可阻止这种情况, 即系统函数不会调用失败, 而是继续阻塞系统调用.
                                 //!<    - `SA_SIGINFO`: 调用信号处理器程序时携带了额外参数, 其中提供了关于信号的深入信息.
     void (*sa_restorer)(void);  //!< 未使用
+
+#define sa_handler __sigaction_handler.sa_handler       //!< sigaction.sa_handler
+#define sa_sigaction __sigaction_handler.sa_sigaction   //!< sigaction.sa_sigaction
 };
 
 /**
@@ -445,7 +448,7 @@ int
 sigaltstack(const stack_t sigstack, stack_t *old_sigstack);
 
 /**
- * @brief 修改信号的 @ref SA_RESTART 标志
+ * @brief 修改信号的 SA_RESTART 标志
  *
  * @param sig 要修改的信号
  * @param flag 设置的标志位:
