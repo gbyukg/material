@@ -287,3 +287,54 @@ exit(int status);
  */
 int
 atexit(void (*func)(void));
+
+/**
+ * @brief 等待子进程
+ *
+ * 在执行该函数时, 如果当前没有子进程结束执行, 则阻塞系统调用, 直到某个子进程终止.
+ * 如果在运行 wait() 函数之前已经有子进程终止, 则 wati() 马上返回.
+ * 内核将会为父进程下所有子进程的运行总量追加到进程 CPU 时间, 参照 times() 函数.
+ *
+ * @param status 若该参数不为 NULL, 则子进程如何终止的信息会通过该参数指向的整形变量返回.
+ *
+ * @return 函数执行的状态, 若函数执行成功, 返回捕获到的子进程的 进程ID
+ * !retval -1 函数执行失败, 失败的原因可能是进程中已经无子进程在执行,
+ * 此时 errno 会被设置为 `ECHILD`
+ *
+ * @code{.c}
+ * // 等待所有子进程结束
+ * while ((childPid = wait(NULL)) != -1)
+ *     continue;
+ * if (errno != ECHILD)
+ *     exit(1);
+ * @endcode
+ */
+pid_t
+wait(int *status);
+
+/**
+ * @brief 等待子进程结束
+ *
+ * 相对于 wait() 函数, 该函数更具有优势
+ *   - 可以通过子进程的 进程ID 来指定要等待的子进程
+ *   - 即使没有子进程终止, 也可以不阻塞系统的运行
+ *   - 可以捕获子进程因某个信号(如 SIGSTOP 或 SIGTTIN)而停止,
+ *   或是已经停止子进程收到 SIGCONT 信号后恢复执行的情况.
+ *
+ * @param pid 可有多中不同选项:
+ *   - @p pid 大于 0: 表示等待进程 ID 为 @p pid 的子进程.
+ *   - @p pid 等于 0: 等待与调用进程同一进程组的所有子进程.
+ *   - @p pid 小于 -1: 等待进程组标示符与 @p pid 绝对值相等的所有子进程
+ *   - @p pid 等于 -1: 等待任意子进程.
+ * @param status 参考 wait()
+ * @param options 位掩码, 可以包含0个或多个如下标志
+ *   - `WUNTRACED`: 除了返回终止子进程的信息外, 还返回因信号而停止的子进程信息
+ *   - `WCONTINUED`: 返回哪些因收到 SIGCONT 信号而恢复执行的已停止子进程的状态信息
+ *   - `WNOHANG`: 如果 @p pid 指定的子进程并未发生状态改变, 则立即返回, 而不会阻塞.
+ *   这种情况下, waitpid() 返回0. 如果调用进程并无与 @p pid 匹配的子进程,
+ *   则 waitpid() 报错, 并将 errno 设置为 ECHILD.
+ *
+ * @return
+ */
+pid_t
+waitpid(pid_t pid, int *status, int options);
