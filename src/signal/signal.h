@@ -465,3 +465,25 @@ sigaltstack(const stack_t sigstack, stack_t *old_sigstack);
  */
 int
 siginterrupt(int sig, int flag);
+
+/**
+ * @brief 使用掩码来等待信号
+ *
+ * 将以 @p mask 所执行的信号集来替换进程的信号掩码, 然后挂起进程的执行,
+ * 直到捕获到信号, 并从信号处理器中返回. 一旦处理器返回, sigsuspend()
+ * 会将进程信号掩码恢复为调用前的值. 相当于
+ * @code{.c}
+ * sigprocmask(SIG_SETMASK, &mask, &prevMask);
+ * pause()
+ * sigprocmask(SIG_SETMASK, &prevMask, NULL);
+ * @endcode
+ * 但 sigsuspend() 是一个原子操作.
+ *
+ * @param mask 要阻塞的信号集
+ *
+ * @return 返回 -1, error 的值:
+ *   - `EINTR`: 被信号中断
+ *   - `EFAULT`: @p mask 指向了无效的地址
+ */
+int
+sigsuspend(const sigset_t *mask);
