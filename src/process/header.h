@@ -318,7 +318,7 @@ wait(int *status);
  * 相对于 wait() 函数, 该函数更具有优势
  *   - 可以通过子进程的 进程ID 来指定要等待的子进程
  *   - 即使没有子进程终止, 也可以不阻塞系统的运行
- *   - 可以捕获子进程因某个信号(如 SIGSTOP 或 SIGTTIN)而停止,
+ *   - 可以捕获到子进程因某个信号(如 SIGSTOP 或 SIGTTIN)而停止,
  *   或是已经停止子进程收到 SIGCONT 信号后恢复执行的情况.
  *
  * @param pid 可有多中不同选项:
@@ -329,7 +329,7 @@ wait(int *status);
  * @param status 参考 wait()
  * @param options 位掩码, 可以包含0个或多个如下标志
  *   - `WUNTRACED`: 除了返回终止子进程的信息外, 还返回因信号而停止的子进程信息
- *   - `WCONTINUED`: 返回哪些因收到 SIGCONT 信号而恢复执行的已停止子进程的状态信息
+ *   - `WCONTINUED`: 返回那些因收到 SIGCONT 信号而恢复执行的已停止子进程的状态信息
  *   - `WNOHANG`: 如果 @p pid 指定的子进程并未发生状态改变, 则立即返回, 而不会阻塞.
  *   这种情况下, waitpid() 返回0. 如果调用进程并无与 @p pid 匹配的子进程,
  *   则 waitpid() 报错, 并将 errno 设置为 ECHILD.
