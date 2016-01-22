@@ -461,7 +461,7 @@ sigaltstack(const stack_t sigstack, stack_t *old_sigstack);
  *
  * @see sigaction()
  *
- * @note SUSv4 标记 siginterrupt() 为已废止, 并推荐使用 sigaction() 替代.
+ * @note SUSv4 标记 siginterrupt() 为已废止, 并推荐使用 sigaction() 作为替代.
  */
 int
 siginterrupt(int sig, int flag);
