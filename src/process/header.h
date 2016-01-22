@@ -334,7 +334,7 @@ wait(int *status);
  *   这种情况下, waitpid() 返回0. 如果调用进程并无与 @p pid 匹配的子进程,
  *   则 waitpid() 报错, 并将 errno 设置为 ECHILD.
  *
- * @return
+ * @return 返回捕获到的子进程ID
  */
 pid_t
 waitpid(pid_t pid, int *status, int options);
