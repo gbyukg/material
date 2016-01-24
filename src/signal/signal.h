@@ -425,7 +425,7 @@ pause(void);
  * 函数 abort() 通过产生 `SIGABRT` 信号来终止调用进程.
  * 对 SIGABRT 的默认动作是产生核心转储文件并终止进程.
  *
- * SUSv3 要求, 无论阻塞和忽略 `SIGABRT` 信号, abort() 调用均不受影响.
+ * SUSv3 要求, 无论阻塞和忽略 `SIGABRT` 信号, abort() 函数的调用均不受影响.
  */
 void
 abort(void);
