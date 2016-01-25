@@ -248,6 +248,12 @@ _exit(int status);
 /**
  * @brief 退出进程的库函数
  *
+ * <stdlib.h>
+ *
+ * exit() 与 _Exit() 函数存在于 <stdlib.h> 头文件中, 而 _exit() 则存在于 <unistd.h> 头文件中,
+ * 之所以存储在不同的头文件中, 是因为 exit() 与 _Exit() 是由 ISO C 说明的,
+ * _exit() 是由 POSIX.1 说明的.
+ *
  * 该函数是对 _exit() 函数的封装, 执行流程如下:
  *   - 调用退出处理程序(通过 atexit() 和 on_exit() 注册的函数)
  *   - 刷新 `stdio` 流缓冲区
