@@ -358,14 +358,37 @@ pid_t
 waitpid(pid_t pid, int *status, int options);
 
 /**
-* @brief
+* @brief 与 waitpid() 作用一样, 但是提供了更多的选项用于等待不同状态的子进程通过
+* @p options 参数.
 *
-* @param idtype
-* @param id
+* @param idtype 与 @p id 结合使用, 用来确定监控那些子进程, 可用值:
+*   - `P_ALL`: 等待任意子进程, 此时将忽略 @p id 参数
+*   - `P_PID`: 等待进程 ID 为 @p id 的子进程
+*   - `P_PGID`: 等待进程组 ID 为 @p id 下的任意子进程
+* @param id 与 @p idtype 结合使用
 * @param infop
-* @param options
+* @param options 通过 RO 操作, 指定一个或多个下列值, 来获取不同状态的子进程:
+*   - `WEXITED`: 获取所有终止的进程, 包括正常终止以及因信号中断的子进程.
+*   - `WSTOPPED`: 捕获因信号而停止的进程.
+*   - `WCONTINUED`: 捕获因 SIGCONT 信号而重新运行的子进程.
+*   - `WNOHANG`: 与 waitpid() 功能一样, 如果设定了该选项, 则函数调用立即返回,
+*   而不会阻塞系统, 此时函数调用返回 0, 如果调用进程并无进程号为 @p id 的子进程,
+*   函数调用返回失败, 并将 errno 设置为 `ECHILD`.<BR>
+*   由于 waitid() 执行成功后返回 0, 而并非捕获到的子进程ID, 当指定该选项时,
+*   即使没有子进程结束, waitid() 同样会返回 0, 这样讲无法得知子进程是否已经结束.
+*   此时通过判断 @p infop 参数是否为空来判断子进程是否已经结束, 如果结束,
+*   则会将相关信息填充到 @p infop 结构中, 如果子进程没有结束, 则不会填充该结构体,
+*   因此可以通过判断 @p infop 是否为空来判断子进程是否已经结束. 有些系统实现了如果子进程没有结束,
+*   则自动将 @p infop 置为 NULL, 但有些系统并没有实现该功能, 因此, 为了可移植性,
+*   在调用 waitid() 之前, 应当手动将 @p infop 置空.
+*   - `WNOWAIT`: 当一个子进程的结束被 wait() 系列函数捕获到后, 系统就会释放掉子进程保留的一些最基本的信息,
+*   如果指定了该选项, 子进程状态会被返回, 但不会释放掉子进程相关信息,
+*   之后仍然可以使用 wait() 系列函数获取到该子进程.
 *
-* @return
+* @return 返回函数执行状态
+* @retval 0 函数执行成功, 与 waitpid() 不同, 并不返回获取到的子进程 ID
+* @retval -1 函数执行失败. 如果 @p id 指定的子进程不存在, errno 将被设置为 `ECHILD`.
+*
 * @see wait()
 * @see waitpid()
 * @see http://man7.org/linux/man-pages/man2/waitid.2.html
