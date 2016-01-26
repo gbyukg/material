@@ -305,9 +305,13 @@ atexit(void (*func)(void));
  *
  * <sys/wait.h>
  *
- * 在执行该函数时, 如果当前没有子进程结束执行, 则阻塞系统调用, 直到某个子进程终止.
+ * 该函数用于获取子进程结束状态信息, 当执行该函数时, 如果当前没有子进程结束执行,
+ * 则阻塞系统调用, 直到某个子进程终止.
  * 如果在运行 wait() 函数之前已经有子进程终止, 则 wati() 马上返回.
  * 内核将会为父进程下所有子进程的运行总量追加到进程 CPU 时间, 参照 times() 函数.
+ *
+ * 调用 wait(), waitpid() 或 waitid() 等函数之后, 同时会释放掉子进程用于让父进程捕获的一些信息,
+ * 如果子进程结束后, 父进程没有调用该系列函数, 则该子进程将会成为僵尸进程.
  *
  * @param status 若该参数不为 NULL, 则子进程如何终止的信息会通过该参数指向的整形变量返回.
  *
@@ -352,3 +356,19 @@ wait(int *status);
  */
 pid_t
 waitpid(pid_t pid, int *status, int options);
+
+/**
+* @brief
+*
+* @param idtype
+* @param id
+* @param infop
+* @param options
+*
+* @return
+* @see wait()
+* @see waitpid()
+* @see http://man7.org/linux/man-pages/man2/waitid.2.html
+*/
+int
+waitid(idtype_t idtype, id_t id, siginfo_t *infop, int options);
