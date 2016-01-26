@@ -256,7 +256,7 @@ _exit(int status);
  *
  * 该函数是对 _exit() 函数的封装, 执行流程如下:
  *   - 调用退出处理程序(通过 atexit() 和 on_exit() 注册的函数)
- *   - 刷新 `stdio` 流缓冲区
+ *   - 循环调用 fclose() 关闭所有打开的流文件, 刷新 `stdio` 流缓冲区
  *   - 使用由 @p status 提供的值执行 _exit() 系统调用
  *
  * @param status 指定的程序退出状态码
