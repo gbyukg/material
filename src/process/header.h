@@ -261,7 +261,7 @@ _exit(int status);
  *
  * @param status 指定的程序退出状态码
  *
- * @note 非异步信号安全函数, 因为该函数会刷新 stdio 流缓冲区.
+ * @note 该函数属于非异步信号安全函数, 因为该函数会刷新 stdio 流缓冲区.
  *
  * @see eixt()
  * @see atexit()
