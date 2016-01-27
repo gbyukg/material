@@ -396,5 +396,46 @@ waitpid(pid_t pid, int *status, int options);
 int
 waitid(idtype_t idtype, id_t id, siginfo_t *infop, int options);
 
+/**
+ * @brief 执行新程序
+ *
+ * exec 系列函数执行新程序, 该函数的调用可将新程序加载到当前执行进程的内存空间.
+ * 在这一操作过程中, 将丢弃旧有的程序, 而进程的栈, 数据以及堆段会被新程序的相应部件所替换.
+ *
+ * 调用 execve() 之后, 因为同一进程仍然存在, 所有 进程ID 并未发生改变.
+ *
+ * 由于是对调用程序取而代之, 对 exec 系列函数的调用永远不会返回,
+ * 而且也无需检查 exec 系列函数的返回值, 因为该值总是雷打不动地等于 -1.
+ * 实际上, 一旦函数返回, 就表明发生了错误.
+ *
+ * @param pathname
+ * @param argv[]
+ * @param envp[]
+ *
+ * @return 若函数执行成功, 则没有返回值.
+ * @retval -1 函数执行失败, 当出错时候, 可通过 errno 获取错误原因, errno 可能的值有:
+ *   - `EACCES`:
+ *   - `ENOENT`: @p pathname 所指代的文件不存在.
+ *   - `ENOEXEC`: 尽管对 @p pathname 所指代的文件赋予了可执行权限,
+ *   但系统却无法识别其文件格式.
+ *   - `ETXTBSY`: 存在一个或多个进程已经以写入方式打开 @p pathname 所指代的文件.
+ *   参考 open() 函数.
+ *   - `E2BIG`: 参数列表和环境变量所需空间总和超出了允许的最大值.
+ */
 int
-execle(const char *pathname, const char *arg, ... /*, (char *)NULL, char *const envp[] */);
+execve(const char *pathname, char *const argv[], char *const envp[]);
+
+int
+execle(const char *pathname, const char *arg, (char *)NULL, char *const envp[]);
+
+int
+execlp(const char *filename, const char *arg, ... /*, (char *) NULL */);
+
+int
+execvp(const char *filename, char *const argv[]);
+
+int
+execv(const char *pathname, char *const argv[]);
+
+int
+execl(const char *pathname, const char *arg, ... /* , (char *) NULL */;
