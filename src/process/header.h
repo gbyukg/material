@@ -408,6 +408,16 @@ waitid(idtype_t idtype, id_t id, siginfo_t *infop, int options);
  * 而且也无需检查 exec 系列函数的返回值, 因为该值总是雷打不动地等于 -1.
  * 实际上, 一旦函数返回, 就表明发生了错误.
  *
+ * exec 系列函数中,
+ *   - `p` 代表允许只提供路径名, 而不用提供要执行文件的完整路径,
+ *   此时系统会在环境变量 PATH 设置的目录下搜索 @p pathname 文件.
+ *   如果文件名中包含 `/`, 则将其试为绝对或相对路径, 此时将不再使用 PATH 系统环境变量.
+ *   - `l` 代表以字符串列表形式来指定参数, 而不使用数组来秒数 `argv` 列表.
+ *   首个参数对应于新程序 main() 函数的 `argv[0]` 参数, 因而通常与参数 @p filename
+ *   或 @p pathname 的 basename 部分相同. 必须以 NULL((char *)NULL) 指针来终止参数列表.
+ *   - `e` 代表允许开发者通过 envp 为新程序显示指定环境变量, 其中 envp 是一个以 NULL 结束的字符串指针数组.
+ *   其他 exec 系列函数将使用调用者当前的环境变量作为新程序的环境.
+ *
  * @param pathname
  * @param argv[]
  * @param envp[]
