@@ -431,21 +431,110 @@ waitid(idtype_t idtype, id_t id, siginfo_t *infop, int options);
  *   - `ETXTBSY`: 存在一个或多个进程已经以写入方式打开 @p pathname 所指代的文件.
  *   参考 open() 函数.
  *   - `E2BIG`: 参数列表和环境变量所需空间总和超出了允许的最大值.
+ *
+ * @see execve()
+ * @see execle()
+ * @see execlp()
+ * @see execvp()
+ * @see execv()
+ * @see execl()
  */
 int
 execve(const char *pathname, char *const argv[], char *const envp[]);
 
+/**
+ * @brief
+ *
+ * @param pathname
+ * @param arg
+ * @param char *
+ * @param envp[]
+ *
+ * @return
+ *
+ * @see execve()
+ * @see execle()
+ * @see execlp()
+ * @see execvp()
+ * @see execv()
+ * @see execl()
+ */
 int
 execle(const char *pathname, const char *arg, (char *)NULL, char *const envp[]);
 
+/**
+ * @brief
+ *
+ * @param filename
+ * @param arg
+ * @param ...
+ *
+ * @return
+ *
+ * @see execve()
+ * @see execle()
+ * @see execlp()
+ * @see execvp()
+ * @see execv()
+ * @see execl()
+ */
 int
 execlp(const char *filename, const char *arg, ... /*, (char *) NULL */);
 
+/**
+ * @brief
+ *
+ * @param filename
+ * @param argv[]
+ *
+ * @return
+ *
+ * @see execve()
+ * @see execle()
+ * @see execlp()
+ * @see execvp()
+ * @see execv()
+ * @see execl()
+ */
 int
 execvp(const char *filename, char *const argv[]);
 
+/**
+ * @brief
+ *
+ * @param pathname
+ * @param argv[]
+ *
+ * @return
+ *
+ * @see execve()
+ * @see execle()
+ * @see execlp()
+ * @see execvp()
+ * @see execv()
+ * @see execl()
+ */
 int
 execv(const char *pathname, char *const argv[]);
 
+/**
+ * @brief 执行外部函数
+ *
+ * @code{.d}
+ * execl("/usr/bin/printenv", "printenv", "USER", "SHELL", (char *)NULL);
+ * @endcode
+ *
+ * @param pathname
+ * @param arg
+ *
+ * @return
+ *
+ * @see execve()
+ * @see execle()
+ * @see execlp()
+ * @see execvp()
+ * @see execv()
+ * @see execl()
+ */
 int
-execl(const char *pathname, const char *arg, ... /* , (char *) NULL */;
+execl(const char *pathname, const char *arg, ... /* , (char *) NULL */);
