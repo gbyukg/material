@@ -412,7 +412,7 @@ waitid(idtype_t idtype, id_t id, siginfo_t *infop, int options);
  *   - `p` 代表允许只提供路径名, 而不用提供要执行文件的完整路径,
  *   此时系统会在环境变量 PATH 设置的目录下搜索 @p pathname 文件.
  *   如果文件名中包含 `/`, 则将其试为绝对或相对路径, 此时将不再使用 PATH 系统环境变量.
- *   - `l` 代表以字符串列表形式来指定参数, 而不使用数组来秒数 `argv` 列表.
+ *   - `l` 代表以字符串列表形式来指定参数, 而不使用数组来描述 `argv` 列表.
  *   首个参数对应于新程序 main() 函数的 `argv[0]` 参数, 因而通常与参数 @p filename
  *   或 @p pathname 的 basename 部分相同. 必须以 NULL((char *)NULL) 指针来终止参数列表.
  *   - `e` 代表允许开发者通过 envp 为新程序显示指定环境变量, 其中 envp 是一个以 NULL 结束的字符串指针数组.
@@ -463,7 +463,11 @@ int
 execle(const char *pathname, const char *arg, (char *)NULL, char *const envp[]);
 
 /**
- * @brief
+ * @brief 执行外部函数
+ *
+ * @code{.c}
+ * execlp(argv[1], argv[1], "hello world", (char *)NULL);
+ * @endcode
  *
  * @param filename
  * @param arg
