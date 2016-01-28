@@ -117,7 +117,8 @@ dup2(int oldfd, int newfd);
  * @param oldfd 将要被复制的文件描述符
  * @param newfd 新复制的文件描述符的编号
  * @param flags 只支持一个标志 `O_CLOEXEC`, 这将促使内核为新文件描述符设置
- * `close-on-exec` 标志位.
+ * `close-on-exec` 标志位, 该标志位用于指定当执行 execve() 系列函数时,
+ * 新程序中会关闭所有在执行 execve() 系列函数中所打开的文件描述符.
  *
  * @return 函数执行成功返回复制出来的文件描述符
  * @retval -1 函数执行失败
@@ -213,7 +214,8 @@ mkstemp(char *template);
  *   - `O_WRONLY` 只写方式打开, 可通过 fcntl() 函数的 `F_GETFL` 获取.
  *   - `O_RDWR` 读写方式打开, 可通过 fcntl() 函数的 `F_GETFL` 获取.
  *   - ---
- *   - `O_CLOEXEC` 设置 close-on-exec 标志位, 该标志位用于创建子进程时, 在子进程中自动关闭该文件描述符.
+ *   - `O_CLOEXEC` 设置 close-on-exec 标志位, 该标志位用于在执行 execve() 系列函数时,
+ *   关闭所有在执行 execve() 系列函数进程中打开的文件描述符.
  *   - `O_CREAT` 如果要打开的文件不存在, 则创建文件, 此时 @p mode 参数用于指定创建文件时的权限位.
  *   - `O_DIRECT`
  *   - `O_DIRECTORY` 如果给定的路径参数不是目录, 则调用失败.
