@@ -567,7 +567,10 @@ execl(const char *pathname, const char *arg, ... /* , (char *) NULL */);
  *
  * @param command
  *
- * @return
+ * @return 返回值分几种情况:
+ *   - 当 @p command 为 NULL 指针时, 如果 shell 可用则返回 非0 值, 若不可用则返回 0.
+ *   - 如果无法创建子进程, 则返回 -1.
+ *   - 如果所有的系统调用都成功, system() 会返回执行 @p command 的子 shell 的终止状态.
  */
 int
 system(const char *command);
