@@ -559,3 +559,15 @@ execv(const char *pathname, char *const argv[]);
  */
 int
 execl(const char *pathname, const char *arg, ... /* , (char *) NULL */);
+
+/**
+ * @brief 执行 shell 命令
+ *
+ * system 执行效率比较低. 应当尽量避免使用该函数.
+ *
+ * @param command
+ *
+ * @return
+ */
+int
+system(const char *command);
