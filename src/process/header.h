@@ -565,7 +565,7 @@ execl(const char *pathname, const char *arg, ... /* , (char *) NULL */);
  *
  * system 执行效率比较低. 应当尽量避免使用该函数.
  *
- * @param command
+ * @param command 要执行的命令, 字符串指针.
  *
  * @return 返回值分几种情况:
  *   - 当 @p command 为 NULL 指针时, 如果 shell 可用则返回 非0 值, 若不可用则返回 0.
