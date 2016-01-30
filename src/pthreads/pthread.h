@@ -106,3 +106,32 @@ pthread_create(pthread_t *thread, const pthread_attr_t *attr,
  */
 void
 pthread_exit(void *retval);
+
+/**
+ * @brief 获取线程 DI
+ *
+ * 进程内部的每个线程都有一个唯一标识符: 线程 DI. 线程 ID 会返回给 pthread_creat()
+ * 的调用者, 一个线程可以通过 pthread_self() 来获取自己的线程 ID.
+ *
+ * 在所有的进程中, 线程ID也许并不是唯一的.
+ *
+ * @return
+ */
+pthread_t
+pthread_self(void);
+
+/**
+ * @brief 用于检测两个线程ID是否相同
+ *
+ * 由于SUSv3并未对 pthread_t 类型的实现做任何定义, 每个操作系统的实现方式有可能不同,
+ * 可能是一个整数, 或是一个指针, 或是一个结构体, 因此不能简单的使用 `==` 来判断两个线程ID 是否相同.
+ *
+ * @param t1 线程ID 1
+ * @param t2 线程ID 2
+ *
+ * @return 返回比较结果
+ * @retval 非0 要比较的线程ID相同
+ * @retval 0 不同
+ */
+int
+pthread_equal(pthread_t t1, pthread_t t2);
