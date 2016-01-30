@@ -83,3 +83,26 @@
 int
 pthread_create(pthread_t *thread, const pthread_attr_t *attr,
         void *(*start)(void *), void *arg);
+
+/**
+ * @brief 终止线程
+ *
+ * 终止线程的方法:
+ *   - 线程 start 函数执行 return 语句并返回指定值
+ *   - 线程调用 pthread_exit()
+ *   - 调用 pthread_cancel() 取消线程
+ *   - 任意线程调用了 exit(), 或者主线程(在 main() 函数中)执行了 return 语句,
+ *   都会导致 <B>进程中的所有线程<B> 立即终止.
+ *
+ * 调用 pthread_exit() 相当于在 start 函数中执行 return, 不同之处是,
+ * pthread_exit() 可以在线程 start 函数所调用的任意函数中调用 pthread_exit() 来结束该线程.
+ *
+ * 如果主线程中调用了 pthread_exit(), 而非执行了 exit() 或 return 语句,
+ * 那么其他线程将会继续执行.
+ *
+ * @param retval 指定了线程的返回值. 该参数所指向的内容不应该被分配与线程栈中,
+ * 因为当线程终止时, 将无法确定线程栈的内容是否有效. 出于同样道理,
+ * 也不应在线程栈中分配线程 start 函数的返回值.
+ */
+void
+pthread_exit(void *retval);
