@@ -56,3 +56,30 @@
  * @date 2016-01-30
  */
 
+/**
+ * @brief 创建线程
+ *
+ * <pthread.h>
+ *
+ * 创建新的线程之后, 新线程会从 @p start 所指定的函数开始执行.
+ *
+ * @param thread 指向 pthread_t 类型的缓冲区, 在 pthread_create() 返回前,
+ * 会在此保存一个该线程的唯一标识. 后续的 Pthreads 函数将使用该表示来引用此线程.<BR>
+ * SUSv3 规定, 在新线程开始执行之前, 实现无需对 @p thread 参数所指向的缓冲区进行初始化,
+ * 即新线程可能会在 pthread_create() 函数返回之前就已经开始执行.
+ * 如新线程需要获取自身的线程 DI, 则只能通过调用 pthread_self() 方法.
+ * @param attr 指向 `pthread_attr_t` 对象的指针, 该对象指定了新线程的各种属性.
+ * 如果该属性设为 NULL, 那么创建新线程时将使用各个默认属性.
+ * @param start 执行一个返回类型为 `void *` 的函数指针, 新创建的线程会从该函数开始执行,
+ * 当函数执行完毕, 该线程也将结束.
+ * @param arg 为执行 @p start 函数时传递的参数. 一般情况下,
+ * 该参数应当指向一个全局或堆变量, 也可以将其设置为 NULL.
+ * 将参数类型设置为 `void`, 意味着可以将指向任意类型对象的指针传递给 @p start() 函数.
+ * 如果要传递多个参数, 可以将 @p arg 指向一个结构, 结构中保存了要传递的多个参数.
+ *
+ * @return 返回函数的执行状态
+ * @retval 0 函数执行成功
+ */
+int
+pthread_create(pthread_t *thread, const pthread_attr_t *attr,
+        void *(*start)(void *), void *arg);
