@@ -253,6 +253,12 @@ struct itimerval {
  * 通过 setitimer() 函数创建的定时器可以跨越 exec() 调用而得以保存, 但由 fork()
  * 创建的子进程并不集成该定时器.
  *
+ * 继承关系:
+ *
+ * fork() | exec | 线程
+ * ------ | ---- | ----
+ * 否     | 是   | 是
+ *
  * @param which 指定何种类型的定时器:
  *   - `ITIMER_REAL` 创建以真实时间倒计时的定时器. 到期时会产生 @ref SIGALARM 信号.
  *   - `ITIMER_VIRTUAL` 创建以进程虚拟时间(用户模式下的 CPU 时间)倒计时的定时器.

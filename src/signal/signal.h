@@ -362,6 +362,12 @@ sigismember(const sigset_t *set, int sig);
  * 系统调用将忽略试图阻塞 `SIGKILL` 和 `SIGSTOP` 信号的请求.
  * 如果试图阻塞这些信号, sigprocmask() 函数既不会予以关注, 也不会产生错误.
  *
+ * 继承关系:
+ *
+ * fork() | exec | 线程
+ * ------ | ---- | ----
+ * 是     | 是   | 否
+ *
  * @param how 指定了修改进程的信号掩码方式:
  *   - `SIG_BLOCK`: 将 @p set 指向的信号集内的所有信号添加到当前的信号掩码中.
  *   - `SIG_UNBLOCK`: 将 @p set 指向的信号集内的所有信号从当前信号掩码中移除.
