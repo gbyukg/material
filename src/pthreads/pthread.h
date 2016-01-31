@@ -157,7 +157,32 @@ pthread_equal(pthread_t t1, pthread_t t2);
  * @param retval 若为非空指针时, 保存@p thread 线程返回时值的拷贝,
  * 该返回值即线程调用 `return` 或 `pthread_exit()` 时所指定的值.
  *
- * @return
+ * @return 返回函数执行状态
+ * @retval 0 函数执行成功
+ * @retval 大于0 函数执行失败
  */
 int
 pthread_join(pthread_t thread, void **retval);
+
+/**
+ * @brief 分离线程
+ *
+ * 有时并不关心线程退出的状态, 只是希望线程在终止时能够自动清理并移除之.
+ * 这种情况下可调用 pthread_detach() 函数, 当执行了该函数后, 指定的线程在终止时将自动进行清理操作.
+ * 该函数并不会阻塞系统的执行.
+ *
+ * 对执行了 pthread_detach() 函数的线程, 不能够在执行 pthread_join() 函数.
+ *
+ * @code{.c}
+ * // 自动清理自身线程, 在结束后.
+ * pthread_detach(pthread_self());
+ * @endcode
+ *
+ * @param thread
+ *
+ * @return 函数执行状态
+ * @retval 0 函数执行成功
+ * @retval 大于0 函数执行失败
+ */
+int
+pthread_detach(pthread_t thread);
