@@ -135,3 +135,29 @@ pthread_self(void);
  */
 int
 pthread_equal(pthread_t t1, pthread_t t2);
+
+/**
+ * @brief 连接已终止的线程
+ *
+ * 若线程并未分离(pthread_detach()), 则必须使用 pthread_join() 来进行连接.
+ * 如果未能连接, 那么线程终止时将会产生 <B>僵尸线程<B>, 类似 僵尸进程 的概念.
+ * 除了浪费资源以外, 僵尸线程若积累过多, 应用将再也无法创建新的线程.<BR>
+ * pthread_join() 类似于 wait() 的功能, 但是又存在一些不同点:
+ *   - 线程之间的关系是对等的. 进程中的任意线程均可以调用 pthread_join()
+ *   与该进程的任何其他线程连接起来. 这与进程不同, 如果父进程创建了子进程,
+ *   那么父进程是唯一能够对子进程调用 wait() 的进程.
+ *   - 无法连接任意线程, 必须要指定一个线程, 也没有非阻模式的 pthread_join().
+ *
+ * 等待由 @p thread 标识的线程终止. 如果线程已经终止, 则 pthread_join() 会马上返回,
+ * 否则会阻塞系统指定.
+ *
+ * 如果 pthread_join() 函数传入一个之前已经连接过的线程 ID, 将会导致无法预知的行为.
+ *
+ * @param thread 指定要等待终止的线程.
+ * @param retval 若为非空指针时, 保存@p thread 线程返回时值的拷贝,
+ * 该返回值即线程调用 `return` 或 `pthread_exit()` 时所指定的值.
+ *
+ * @return
+ */
+int
+pthread_join(pthread_t thread, void **retval);
