@@ -214,3 +214,42 @@ pthread_join(pthread_t thread, void **retval);
  */
 int
 pthread_detach(pthread_t thread);
+
+/**
+ * @brief 锁定互斥量
+ *
+ * 互斥量在通过 @r PTHREAD_MUTEX_INITIALIZER 或 初始化之后处于未锁定状态,
+ * 该函数用于锁定互斥量.
+ *
+ * 当锁定一个已经由其他线程锁定了的互斥量时, 该调用将会阻塞系统调用,
+ * 直到这个互斥量被解锁为止.
+ *
+ * 如果线程尝试锁定一个已经被当前线程锁定的互斥量时, 可能发生的情况有:
+ *   - 线程陷入死循环(deadlock), Linux 默认行为
+ *   - 调用失败, 并设置 errno 为 `EDEADLK`
+ *
+ * @param mutex 要锁定的互斥量变量.
+ *
+ * @return
+ *
+ * @see pthread_mutex_unlock()
+ */
+int
+pthread_mutex_lock(pthread_mutex_t *mutex);
+
+/**
+ * @brief 解锁由自身线程锁定的互斥量
+ *
+ * 当要锁定的互斥量当前处于未锁定状态, 该调用将锁定互斥量, 并马上返回.
+ *
+ * 如果同时有多个线程正在等待由 pthread_mutex_unlock() 解锁的互斥量时,
+ * 在互斥量被解锁之后, 无法判断哪个线程会先获取到这个互斥量.
+ *
+ * @param mutex
+ *
+ * @return
+ *
+ * @see pthread_mutex_lock()
+ */
+int
+pthread_mutex_unlock(pthread_mutex_t *mutex);
