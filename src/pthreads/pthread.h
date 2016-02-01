@@ -63,6 +63,12 @@
  * 当试图对已经锁定的某一互斥量再次加锁, 将可能阻塞线程或者报错失败, 具体取决于加锁时使用的方法.<BR>
  * 一旦互斥量被锁定, 锁定互斥量的线程即成为该互斥量的所有者. 只有所有者才能给互斥量解锁.
  *
+ * 互斥量有两种类型:
+ *   - 静态互斥量: 在使用之前, 必须通过 @ref PTHREAD_MUTEX_INITIALIZER 进行初始化之后才可以使用.
+ *   - 动态互斥量: 通过 malloc() 分配.
+ *
+ * 互斥量初始化操作只能应用于互斥量的真身, 不能对他们的 副本(copy) 进行初始化操作.
+ *
  * @author Lock
  * @version V1.0
  * @date 2016-01-30
@@ -71,6 +77,10 @@
 
 /**
  * @brief 初始化静态分配的互斥量
+ *
+ * @code{.c}
+ * pthread_mutex_t mtx = PTHREAD_MUTEX_INITIALIZER;
+ * @endcode
  */
 #define PTHREAD_MUTEX_INITIALIZER {0, 0, -1, -1, -1}
 
