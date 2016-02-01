@@ -64,7 +64,7 @@
  * 一旦互斥量被锁定, 锁定互斥量的线程即成为该互斥量的所有者. 只有所有者才能给互斥量解锁.
  *
  * 互斥量有两种类型:
- *   - 静态互斥量: 在使用之前, 必须通过 @ref PTHREAD_MUTEX_INITIALIZER 进行初始化之后才可以使用.
+ *   - 静态互斥量: 经由静态分配且携带默认属性.在使用之前, 必须通过 @ref PTHREAD_MUTEX_INITIALIZER 进行初始化之后才可以使用.
  *   - 动态互斥量: 通过 malloc() 分配.
  *
  * 互斥量初始化操作只能应用于互斥量的真身, 不能对他们的 副本(copy) 进行初始化操作.
@@ -218,7 +218,7 @@ pthread_detach(pthread_t thread);
 /**
  * @brief 锁定互斥量
  *
- * 互斥量在通过 @r PTHREAD_MUTEX_INITIALIZER 或 初始化之后处于未锁定状态,
+ * 互斥量在通过 @r PTHREAD_MUTEX_INITIALIZER 或 pthread_mutex_init() 初始化之后处于未锁定状态,
  * 该函数用于锁定互斥量.
  *
  * 当锁定一个已经由其他线程锁定了的互斥量时, 该调用将会阻塞系统调用,
@@ -230,7 +230,8 @@ pthread_detach(pthread_t thread);
  *
  * @param mutex 要锁定的互斥量变量.
  *
- * @return
+ * @return 返回函数执行状态
+ * @retval 0 函数执行成功.
  *
  * @see pthread_mutex_unlock()
  */
@@ -247,9 +248,46 @@ pthread_mutex_lock(pthread_mutex_t *mutex);
  *
  * @param mutex
  *
- * @return
+ * @return 返回函数执行状态
+ * @retval 0 函数执行成功.
  *
  * @see pthread_mutex_lock()
  */
 int
 pthread_mutex_unlock(pthread_mutex_t *mutex);
+
+/**
+ * @brief 动态初始化互斥量
+ *
+ * 必须使用函数 pthread_mutex_init() 函数初始化一个互斥量的情况为:
+ *   - 动态分配与堆中的互斥量.
+ *   - 互斥量是在栈中分配的自动变量.
+ *   - 初始化经由静态分配, 且不使用默认属性的互斥量.
+ *
+ * SUSv3 规定, 初始化一个已经被初始化过的互斥量, 将会导致未定义行为,
+ * 应当避免重复初始化互斥量.
+ *
+ * @param mutex 要初始化的目标互斥量.
+ * @param attr pthread_mutexattr_t 类型对象, 该对象在函数调用之前经过了初始化处理, 用于定义互斥量的属性.
+ * 若为 NULL, 则使用默认属性.
+ *
+ * @return 返回函数执行状态
+ * @retval 0 函数执行成功.
+ */
+int
+pthread_mutex_init(pthread_mutex_t *mutex, const pthread_mutexattr_t *attr);
+
+/**
+ * @brief 销毁动态互斥量
+ *
+ * 当一个动态互斥量不再使用时, 应当释放互斥量所占用的资源.
+ *
+ * 静态互斥量则无需释放.
+ *
+ * @param mutex 要释放的动态互斥量
+ *
+ * @return 返回函数执行状态
+ * @retval 0 函数执行成功.
+ */
+int
+pthread_mutex_destory(pthread_mutex_t *mutex);
