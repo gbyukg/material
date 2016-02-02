@@ -59,3 +59,26 @@
  * @date 2016-02-02
  */
 
+/**
+ * @brief 获取进程组 ID
+ *
+ * 进程组ID 类型与 进程ID 相同, 都为 `pid_t` 类型.
+ *
+ * @return 返回获取到的进程组 ID, 该函数永远会执行成功.
+ */
+pid_t
+getpgrp(void);
+
+/**
+ * @brief 修改进程的 进程组ID
+ *
+ * @param pid 要修改的 进程ID. 如果为 0, 则修改当前的调用进程.
+ * @param pgid 为进程 @p pid 指定的新进程组ID. 如果为0,
+ * @p pid 的进程组的值会被设置成 @p pid 的值.
+ *
+ * @return 返回函数执行状态
+ * @retval 0 函数执行成功
+ * @retval -1 函数执行失败
+ */
+int
+setpgid(pid_t pid, pid_t pgid);
