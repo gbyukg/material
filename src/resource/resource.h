@@ -47,6 +47,14 @@ struct rusage {
 };
 
 /**
+ * @brief 用于保存进程的资源限制信息.
+ */
+struct rlimit {
+    rlim_t rlim_cur;    //!< 软限制, rlim_t 是一个整数类型
+    rlim_t rlim_max;    //!< 硬限制
+}
+
+/**
  * @brief 获取调用进程或其子进程用掉的各类系统资源的统计信息.
  *
  * @param who 指定要查询的进程, 可选值为:
@@ -62,3 +70,34 @@ struct rusage {
 int
 getrusage(int who, struct rusage *res_usage);
 
+/**
+ * @brief 获取当前进程的各个系统资源限制信息
+ *
+ * @param resource 要获取的资源限制
+ * @param rlim 一个指向 @ref rlimit 结构体的指针,
+ * 用于存储获取到的资源限制信息.
+ *
+ * @return 返回函数执行状态
+ * @retval 0 函数执行成功
+ * @retval -1 函数执行失败
+ *
+ * @see setrlimit()
+ */
+int
+getrlimit(int resource, struct rlimit *rlim);
+
+/**
+ * @brief 设置当前进程的资源限制的值
+ *
+ * @param resource 要设置的资源
+ * @param rlim 一个指向 @ref rlimit 结构体的指针,
+ * 用于设置当前执行进程的 @p resource 资源的值.
+ *
+ * @return 返回函数执行状态
+ * @retval 0 函数执行成功
+ * @retval -1 函数执行失败
+ *
+ * @see getrlimit()
+ */
+int
+setrlimit(int resource, const struct rlimit *rlim);
