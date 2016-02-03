@@ -93,7 +93,6 @@ getpgrp(void);
 int
 setpgid(pid_t pid, pid_t pgid);
 
-
 /**
  * @brief 获取指定进程的会话 ID
  *
